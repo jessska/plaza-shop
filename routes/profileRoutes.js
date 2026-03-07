@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const db = require('../database/sqlite');
+const { query } = require('../database/postgres'); // ← изменили подключение
 const bcrypt = require('bcrypt');
 
 // Middleware: проверка авторизации
@@ -12,16 +12,18 @@ const requireAuth = (req, res, next) => {
 };
 
 // ===== НАСТРОЙКИ ПРОФИЛЯ =====
-router.get('/settings', requireAuth, (req, res) => {
+router.get('/settings', requireAuth, async (req, res) => {
     try {
-        let settings = db.prepare('SELECT * FROM user_settings WHERE user_id = ?').get(req.session.user.id);
+        let settingsResult = await query('SELECT * FROM user_settings WHERE user_id = $1', [req.session.user.id]);
+        let settings = settingsResult.rows[0];
         
         if (!settings) {
-            db.prepare('INSERT INTO user_settings (user_id) VALUES (?)').run(req.session.user.id);
+            await query('INSERT INTO user_settings (user_id) VALUES ($1)', [req.session.user.id]);
             settings = { email_notifications: 1, hunt_notifications: 1, language: 'ru' };
         }
         
-        const user = db.prepare('SELECT * FROM users WHERE id = ?').get(req.session.user.id);
+        const userResult = await query('SELECT * FROM users WHERE id = $1', [req.session.user.id]);
+        const user = userResult.rows[0];
         
         res.render('settings', {
             title: 'Настройки профиля',
@@ -36,19 +38,20 @@ router.get('/settings', requireAuth, (req, res) => {
     }
 });
 
-router.post('/settings', requireAuth, (req, res) => {
+router.post('/settings', requireAuth, async (req, res) => {
     const { email_notifications, hunt_notifications, language } = req.body;
     
     try {
-        db.prepare(`
-            UPDATE user_settings 
-            SET email_notifications = ?, hunt_notifications = ?, language = ?
-            WHERE user_id = ?
-        `).run(
-            email_notifications ? 1 : 0,
-            hunt_notifications ? 1 : 0,
-            language || 'ru',
-            req.session.user.id
+        await query(
+            `UPDATE user_settings 
+            SET email_notifications = $1, hunt_notifications = $2, language = $3
+            WHERE user_id = $4`,
+            [
+                email_notifications ? 1 : 0,
+                hunt_notifications ? 1 : 0,
+                language || 'ru',
+                req.session.user.id
+            ]
         );
         
         res.redirect('/settings?success=1');
@@ -62,7 +65,8 @@ router.post('/change-password', requireAuth, async (req, res) => {
     const { current_password, new_password, confirm_password } = req.body;
     
     try {
-        const user = db.prepare('SELECT * FROM users WHERE id = ?').get(req.session.user.id);
+        const userResult = await query('SELECT * FROM users WHERE id = $1', [req.session.user.id]);
+        const user = userResult.rows[0];
         
         const match = await bcrypt.compare(current_password, user.password);
         if (!match) {
@@ -74,7 +78,7 @@ router.post('/change-password', requireAuth, async (req, res) => {
         }
         
         const hashedPassword = await bcrypt.hash(new_password, 10);
-        db.prepare('UPDATE users SET password = ? WHERE id = ?').run(hashedPassword, req.session.user.id);
+        await query('UPDATE users SET password = $1 WHERE id = $2', [hashedPassword, req.session.user.id]);
         
         res.redirect('/settings?success=password_changed');
     } catch (error) {
@@ -84,15 +88,15 @@ router.post('/change-password', requireAuth, async (req, res) => {
 });
 
 // ===== ОБНОВЛЕНИЕ ПРОФИЛЯ (имя, телефон) =====
-router.post('/update-profile', requireAuth, (req, res) => {
+router.post('/update-profile', requireAuth, async (req, res) => {
     const { fullname, phone } = req.body;
     
     try {
-        db.prepare('UPDATE users SET fullname = ?, phone = ? WHERE id = ?').run(
+        await query('UPDATE users SET fullname = $1, phone = $2 WHERE id = $3', [
             fullname,
             phone,
             req.session.user.id
-        );
+        ]);
         
         req.session.user.fullname = fullname;
         
@@ -106,9 +110,13 @@ router.post('/update-profile', requireAuth, (req, res) => {
 });
 
 // ===== АДРЕСА ДОСТАВКИ =====
-router.get('/addresses', requireAuth, (req, res) => {
+router.get('/addresses', requireAuth, async (req, res) => {
     try {
-        const addresses = db.prepare('SELECT * FROM addresses WHERE user_id = ? ORDER BY is_default DESC, created_at DESC').all(req.session.user.id);
+        const addressesResult = await query(
+            'SELECT * FROM addresses WHERE user_id = $1 ORDER BY is_default DESC, created_at DESC',
+            [req.session.user.id]
+        );
+        const addresses = addressesResult.rows;
         
         res.render('addresses', {
             title: 'Мои адреса',
@@ -132,27 +140,28 @@ router.get('/addresses/new', requireAuth, (req, res) => {
     });
 });
 
-router.post('/addresses', requireAuth, (req, res) => {
+router.post('/addresses', requireAuth, async (req, res) => {
     const { name, recipient, phone, country, city, address, postal_code, is_default } = req.body;
     
     try {
         if (is_default) {
-            db.prepare('UPDATE addresses SET is_default = 0 WHERE user_id = ?').run(req.session.user.id);
+            await query('UPDATE addresses SET is_default = 0 WHERE user_id = $1', [req.session.user.id]);
         }
         
-        db.prepare(`
-            INSERT INTO addresses (user_id, name, recipient, phone, country, city, address, postal_code, is_default)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-        `).run(
-            req.session.user.id,
-            name,
-            recipient,
-            phone,
-            country,
-            city,
-            address,
-            postal_code,
-            is_default ? 1 : 0
+        await query(
+            `INSERT INTO addresses (user_id, name, recipient, phone, country, city, address, postal_code, is_default)
+            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`,
+            [
+                req.session.user.id,
+                name,
+                recipient,
+                phone,
+                country,
+                city,
+                address,
+                postal_code,
+                is_default ? 1 : 0
+            ]
         );
         
         res.redirect('/addresses?success=added');
@@ -162,9 +171,13 @@ router.post('/addresses', requireAuth, (req, res) => {
     }
 });
 
-router.get('/addresses/:id/edit', requireAuth, (req, res) => {
+router.get('/addresses/:id/edit', requireAuth, async (req, res) => {
     try {
-        const address = db.prepare('SELECT * FROM addresses WHERE id = ? AND user_id = ?').get(req.params.id, req.session.user.id);
+        const addressResult = await query(
+            'SELECT * FROM addresses WHERE id = $1 AND user_id = $2',
+            [req.params.id, req.session.user.id]
+        );
+        const address = addressResult.rows[0];
         
         if (!address) {
             return res.redirect('/addresses');
@@ -182,29 +195,30 @@ router.get('/addresses/:id/edit', requireAuth, (req, res) => {
     }
 });
 
-router.post('/addresses/:id', requireAuth, (req, res) => {
+router.post('/addresses/:id', requireAuth, async (req, res) => {
     const { name, recipient, phone, country, city, address, postal_code, is_default } = req.body;
     
     try {
         if (is_default) {
-            db.prepare('UPDATE addresses SET is_default = 0 WHERE user_id = ?').run(req.session.user.id);
+            await query('UPDATE addresses SET is_default = 0 WHERE user_id = $1', [req.session.user.id]);
         }
         
-        db.prepare(`
-            UPDATE addresses 
-            SET name = ?, recipient = ?, phone = ?, country = ?, city = ?, address = ?, postal_code = ?, is_default = ?
-            WHERE id = ? AND user_id = ?
-        `).run(
-            name,
-            recipient,
-            phone,
-            country,
-            city,
-            address,
-            postal_code,
-            is_default ? 1 : 0,
-            req.params.id,
-            req.session.user.id
+        await query(
+            `UPDATE addresses 
+            SET name = $1, recipient = $2, phone = $3, country = $4, city = $5, address = $6, postal_code = $7, is_default = $8
+            WHERE id = $9 AND user_id = $10`,
+            [
+                name,
+                recipient,
+                phone,
+                country,
+                city,
+                address,
+                postal_code,
+                is_default ? 1 : 0,
+                req.params.id,
+                req.session.user.id
+            ]
         );
         
         res.redirect('/addresses?success=updated');
@@ -214,9 +228,12 @@ router.post('/addresses/:id', requireAuth, (req, res) => {
     }
 });
 
-router.post('/addresses/:id/delete', requireAuth, (req, res) => {
+router.post('/addresses/:id/delete', requireAuth, async (req, res) => {
     try {
-        db.prepare('DELETE FROM addresses WHERE id = ? AND user_id = ?').run(req.params.id, req.session.user.id);
+        await query('DELETE FROM addresses WHERE id = $1 AND user_id = $2', [
+            req.params.id,
+            req.session.user.id
+        ]);
         res.redirect('/addresses?success=deleted');
     } catch (error) {
         console.error(error);
@@ -225,9 +242,13 @@ router.post('/addresses/:id/delete', requireAuth, (req, res) => {
 });
 
 // ===== РАЗМЕРЫ =====
-router.get('/sizes', requireAuth, (req, res) => {
+router.get('/sizes', requireAuth, async (req, res) => {
     try {
-        const user = db.prepare('SELECT eu_size, us_size, foot_length FROM users WHERE id = ?').get(req.session.user.id);
+        const userResult = await query(
+            'SELECT eu_size, us_size, foot_length FROM users WHERE id = $1',
+            [req.session.user.id]
+        );
+        const user = userResult.rows[0];
         
         res.render('sizes', {
             title: 'Мои размеры',
@@ -242,15 +263,13 @@ router.get('/sizes', requireAuth, (req, res) => {
     }
 });
 
-router.post('/sizes', requireAuth, (req, res) => {
+router.post('/sizes', requireAuth, async (req, res) => {
     const { eu_size, us_size, foot_length } = req.body;
     
     try {
-        db.prepare('UPDATE users SET eu_size = ?, us_size = ?, foot_length = ? WHERE id = ?').run(
-            eu_size,
-            us_size,
-            foot_length,
-            req.session.user.id
+        await query(
+            'UPDATE users SET eu_size = $1, us_size = $2, foot_length = $3 WHERE id = $4',
+            [eu_size, us_size, foot_length, req.session.user.id]
         );
         
         res.redirect('/sizes?success=1');
@@ -261,15 +280,17 @@ router.post('/sizes', requireAuth, (req, res) => {
 });
 
 // ===== ИЗБРАННОЕ =====
-router.get('/favorites', requireAuth, (req, res) => {
+router.get('/favorites', requireAuth, async (req, res) => {
     try {
-        const favorites = db.prepare(`
-            SELECT f.*, p.name, p.price, p.image, p.brand 
+        const favoritesResult = await query(
+            `SELECT f.*, p.name, p.price, p.image, p.brand 
             FROM favorites f
             JOIN products p ON f.product_id = p.id
-            WHERE f.user_id = ?
-            ORDER BY f.created_at DESC
-        `).all(req.session.user.id);
+            WHERE f.user_id = $1
+            ORDER BY f.created_at DESC`,
+            [req.session.user.id]
+        );
+        const favorites = favoritesResult.rows;
         
         res.render('favorites', {
             title: 'Избранное',
@@ -290,17 +311,17 @@ router.get('/favorites', requireAuth, (req, res) => {
     }
 });
 
-router.post('/favorites/add/:product_id', requireAuth, (req, res) => {
+router.post('/favorites/add/:product_id', requireAuth, async (req, res) => {
     try {
-        const exists = db.prepare('SELECT id FROM favorites WHERE user_id = ? AND product_id = ?').get(
-            req.session.user.id,
-            req.params.product_id
+        const existsResult = await query(
+            'SELECT id FROM favorites WHERE user_id = $1 AND product_id = $2',
+            [req.session.user.id, req.params.product_id]
         );
         
-        if (!exists) {
-            db.prepare('INSERT INTO favorites (user_id, product_id) VALUES (?, ?)').run(
-                req.session.user.id,
-                req.params.product_id
+        if (existsResult.rows.length === 0) {
+            await query(
+                'INSERT INTO favorites (user_id, product_id) VALUES ($1, $2)',
+                [req.session.user.id, req.params.product_id]
             );
         }
         
@@ -311,11 +332,11 @@ router.post('/favorites/add/:product_id', requireAuth, (req, res) => {
     }
 });
 
-router.post('/favorites/remove/:product_id', requireAuth, (req, res) => {
+router.post('/favorites/remove/:product_id', requireAuth, async (req, res) => {
     try {
-        db.prepare('DELETE FROM favorites WHERE user_id = ? AND product_id = ?').run(
-            req.session.user.id,
-            req.params.product_id
+        await query(
+            'DELETE FROM favorites WHERE user_id = $1 AND product_id = $2',
+            [req.session.user.id, req.params.product_id]
         );
         
         res.json({ success: true });
@@ -325,37 +346,16 @@ router.post('/favorites/remove/:product_id', requireAuth, (req, res) => {
     }
 });
 
-// ===== ОХОТА (ИСПРАВЛЕННАЯ) =====
-router.get('/hunts', requireAuth, (req, res) => {
+// ===== ОХОТА =====
+router.get('/hunts', requireAuth, async (req, res) => {
     try {
-        // Проверяем, существует ли таблица
-        const tableCheck = db.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name='hunts'").get();
-        
-        if (!tableCheck) {
-            // Таблицы нет - создаем
-            db.exec(`
-                CREATE TABLE IF NOT EXISTS hunts (
-                    id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    user_id INTEGER NOT NULL,
-                    product_url TEXT NOT NULL,
-                    product_name TEXT NOT NULL,
-                    product_image TEXT,
-                    current_price INTEGER,
-                    target_price INTEGER,
-                    last_checked DATETIME,
-                    status TEXT DEFAULT 'active',
-                    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-                    FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE
-                )
-            `);
-            console.log('✅ Таблица hunts создана');
-        }
-        
-        const hunts = db.prepare(`
-            SELECT * FROM hunts 
-            WHERE user_id = ? AND status = 'active' 
-            ORDER BY created_at DESC
-        `).all(req.session.user.id);
+        const huntsResult = await query(
+            `SELECT * FROM hunts 
+            WHERE user_id = $1 AND status = 'active' 
+            ORDER BY created_at DESC`,
+            [req.session.user.id]
+        );
+        const hunts = huntsResult.rows;
         
         console.log('Найдено охот:', hunts.length);
         
@@ -387,33 +387,35 @@ router.get('/hunts/new', requireAuth, (req, res) => {
 });
 
 // Добавление в охоту со страницы товара
-router.post('/hunts/add/:productId', requireAuth, (req, res) => {
+router.post('/hunts/add/:productId', requireAuth, async (req, res) => {
     try {
-        const product = db.prepare('SELECT * FROM products WHERE id = ?').get(req.params.productId);
+        const productResult = await query('SELECT * FROM products WHERE id = $1', [req.params.productId]);
+        const product = productResult.rows[0];
         
         if (!product) {
             return res.status(404).json({ error: 'Товар не найден' });
         }
         
         // Проверяем, есть ли уже в охоте
-        const existing = db.prepare('SELECT id FROM hunts WHERE user_id = ? AND product_name = ?').get(
-            req.session.user.id,
-            product.name
+        const existingResult = await query(
+            'SELECT id FROM hunts WHERE user_id = $1 AND product_name = $2',
+            [req.session.user.id, product.name]
         );
         
-        if (existing) {
+        if (existingResult.rows.length > 0) {
             return res.json({ success: false, error: 'Уже в охоте' });
         }
         
         // Добавляем в охоту
-        db.prepare(`
-            INSERT INTO hunts (user_id, product_url, product_name, target_price, status)
-            VALUES (?, ?, ?, ?, 'active')
-        `).run(
-            req.session.user.id,
-            product.source_url || '',
-            product.name,
-            product.price
+        await query(
+            `INSERT INTO hunts (user_id, product_url, product_name, target_price, status)
+            VALUES ($1, $2, $3, $4, 'active')`,
+            [
+                req.session.user.id,
+                product.source_url || '',
+                product.name,
+                product.price
+            ]
         );
         
         res.json({ success: true });
@@ -424,11 +426,40 @@ router.post('/hunts/add/:productId', requireAuth, (req, res) => {
     }
 });
 
-router.post('/hunts/:id/delete', requireAuth, (req, res) => {
+// Добавление в охоту из формы
+router.post('/hunts', requireAuth, async (req, res) => {
+    const { product_url, product_name, target_price } = req.body;
+    
     try {
-        db.prepare("UPDATE hunts SET status = 'archived' WHERE id = ? AND user_id = ?").run(
-            req.params.id,
-            req.session.user.id
+        if (!product_name || !product_url) {
+            return res.redirect('/hunts/new?error=1');
+        }
+        
+        await query(
+            `INSERT INTO hunts (user_id, product_url, product_name, target_price, status)
+            VALUES ($1, $2, $3, $4, 'active')`,
+            [
+                req.session.user.id,
+                product_url,
+                product_name,
+                target_price ? parseInt(target_price) : null
+            ]
+        );
+        
+        console.log('✅ Охота добавлена:', product_name);
+        
+        res.redirect('/hunts?success=added');
+    } catch (error) {
+        console.error('❌ Ошибка добавления охоты:', error);
+        res.redirect('/hunts/new?error=1');
+    }
+});
+
+router.post('/hunts/:id/delete', requireAuth, async (req, res) => {
+    try {
+        await query(
+            "UPDATE hunts SET status = 'archived' WHERE id = $1 AND user_id = $2",
+            [req.params.id, req.session.user.id]
         );
         
         res.redirect('/hunts?success=deleted');

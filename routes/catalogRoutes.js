@@ -1,33 +1,38 @@
 const express = require('express');
 const router = express.Router();
-const db = require('../database/sqlite');
+const { query } = require('../database/postgres');
 
 // Каталог с пагинацией
-router.get('/catalog', (req, res) => {
+router.get('/catalog', async (req, res) => {
     try {
         const page = parseInt(req.query.page) || 1;
         const limit = 12;
         const offset = (page - 1) * limit;
         
         // Товары
-        const products = db.prepare(`
-            SELECT * FROM products 
-            ORDER BY created_at DESC 
-            LIMIT ? OFFSET ?
-        `).all(limit, offset);
+        const productsResult = await query(
+            'SELECT * FROM products ORDER BY created_at DESC LIMIT $1 OFFSET $2',
+            [limit, offset]
+        );
+        const products = productsResult.rows;
         
         // Общее количество
-        const totalProducts = db.prepare('SELECT COUNT(*) as count FROM products').get().count;
+        const totalResult = await query('SELECT COUNT(*) as count FROM products');
+        const totalProducts = parseInt(totalResult.rows[0].count);
         const totalPages = Math.ceil(totalProducts / limit);
         
-        // ===== ДАННЫЕ ДЛЯ ФИЛЬТРОВ =====
-        // Количество по категориям
-        const sneakersCount = db.prepare("SELECT COUNT(*) as count FROM products WHERE category = 'SNEAKERS'").get().count;
+        // Данные для фильтров
+        const sneakersResult = await query("SELECT COUNT(*) as count FROM products WHERE category = 'SNEAKERS'");
+        const sneakersCount = parseInt(sneakersResult.rows[0].count);
         
-        // Количество по уровням охоты
-        const easyCount = db.prepare("SELECT COUNT(*) as count FROM products WHERE hunt_level = 'EASY'").get().count;
-        const mediumCount = db.prepare("SELECT COUNT(*) as count FROM products WHERE hunt_level = 'MEDIUM'").get().count;
-        const hardCount = db.prepare("SELECT COUNT(*) as count FROM products WHERE hunt_level = 'HARD'").get().count;
+        const easyResult = await query("SELECT COUNT(*) as count FROM products WHERE hunt_level = 'EASY'");
+        const easyCount = parseInt(easyResult.rows[0].count);
+        
+        const mediumResult = await query("SELECT COUNT(*) as count FROM products WHERE hunt_level = 'MEDIUM'");
+        const mediumCount = parseInt(mediumResult.rows[0].count);
+        
+        const hardResult = await query("SELECT COUNT(*) as count FROM products WHERE hunt_level = 'HARD'");
+        const hardCount = parseInt(hardResult.rows[0].count);
         
         res.render('catalog', {
             title: 'Каталог кроссовок | PLAZA',
@@ -48,15 +53,17 @@ router.get('/catalog', (req, res) => {
     }
 });
 
-// Страница товара (без изменений)
-router.get('/product/:id', (req, res) => {
+// Страница товара
+router.get('/product/:id', async (req, res) => {
     try {
-        const product = db.prepare('SELECT * FROM products WHERE id = ?').get(req.params.id);
+        const productResult = await query('SELECT * FROM products WHERE id = $1', [req.params.id]);
+        const product = productResult.rows[0];
         
         if (!product) {
             return res.status(404).send('Товар не найден');
         }
         
+        // Парсим размеры из JSON
         try {
             product.sizes = JSON.parse(product.sizes);
         } catch (e) {
@@ -66,12 +73,11 @@ router.get('/product/:id', (req, res) => {
         // Похожие товары
         let similarProducts = [];
         try {
-            similarProducts = db.prepare(`
-                SELECT * FROM products 
-                WHERE brand = ? AND id != ? 
-                ORDER BY created_at DESC 
-                LIMIT 4
-            `).all(product.brand, product.id);
+            const similarResult = await query(
+                'SELECT * FROM products WHERE brand = $1 AND id != $2 ORDER BY created_at DESC LIMIT 4',
+                [product.brand, product.id]
+            );
+            similarProducts = similarResult.rows;
         } catch (e) {
             similarProducts = [];
         }

@@ -1,13 +1,20 @@
-const db = require('../database/sqlite');
+const { query } = require('../database/postgres');
 const { parsePoizonProduct } = require('../services/poizonParser');
 
 // Показать каталог
-exports.showCatalog = (req, res) => {
+exports.showCatalog = async (req, res) => {
     try {
-        const products = db.prepare('SELECT * FROM products ORDER BY created_at DESC').all();
+        // Получаем товары
+        const productsResult = await query('SELECT * FROM products ORDER BY created_at DESC');
+        const products = productsResult.rows;
         
-        const brands = db.prepare('SELECT DISTINCT brand FROM products ORDER BY brand').all();
-        const categories = db.prepare('SELECT DISTINCT category FROM products ORDER BY category').all();
+        // Получаем уникальные бренды
+        const brandsResult = await query('SELECT DISTINCT brand FROM products ORDER BY brand');
+        const brands = brandsResult.rows;
+        
+        // Получаем уникальные категории
+        const categoriesResult = await query('SELECT DISTINCT category FROM products ORDER BY category');
+        const categories = categoriesResult.rows;
         
         res.render('catalog', {
             title: 'Каталог кроссовок | PLAZA',
@@ -22,10 +29,11 @@ exports.showCatalog = (req, res) => {
     }
 };
 
-// Страница товара (ОБНОВЛЁННАЯ)
-exports.getProduct = (req, res) => {
+// Страница товара
+exports.getProduct = async (req, res) => {
     try {
-        const product = db.prepare('SELECT * FROM products WHERE id = ?').get(req.params.id);
+        const productResult = await query('SELECT * FROM products WHERE id = $1', [req.params.id]);
+        const product = productResult.rows[0];
         
         if (!product) {
             return res.status(404).send('Товар не найден');
@@ -41,12 +49,11 @@ exports.getProduct = (req, res) => {
         // Получаем похожие товары (того же бренда, но не текущий)
         let similarProducts = [];
         try {
-            similarProducts = db.prepare(`
-                SELECT * FROM products 
-                WHERE brand = ? AND id != ? 
-                ORDER BY created_at DESC 
-                LIMIT 4
-            `).all(product.brand, product.id);
+            const similarResult = await query(
+                'SELECT * FROM products WHERE brand = $1 AND id != $2 ORDER BY created_at DESC LIMIT 4',
+                [product.brand, product.id]
+            );
+            similarProducts = similarResult.rows;
         } catch (e) {
             console.log('Ошибка загрузки похожих товаров:', e.message);
             similarProducts = [];
@@ -55,7 +62,7 @@ exports.getProduct = (req, res) => {
         res.render('product', {
             title: product.name,
             product: product,
-            similarProducts: similarProducts, // ← Теперь передаём
+            similarProducts: similarProducts,
             user: req.session.user || null
         });
     } catch (error) {
@@ -91,12 +98,11 @@ exports.addFromUrl = async (req, res) => {
         const productData = await parsePoizonProduct(url);
 
         // Сохраняем в базу
-        const stmt = db.prepare(`
+        await query(`
             INSERT INTO products 
             (name, brand, price, old_price, description, category, sizes, hunt_level, image, images, source_url, source)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-        `);
-        const result = stmt.run(
+            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
+        `, [
             productData.name,
             productData.brand,
             productData.price,
@@ -109,9 +115,9 @@ exports.addFromUrl = async (req, res) => {
             JSON.stringify(productData.images),
             productData.source_url,
             'poizon'
-        );
+        ]);
 
-        res.redirect(`/product/${result.lastInsertRowid}`);
+        res.redirect('/catalog');
     } catch (error) {
         res.render('add-from-url', {
             title: 'Добавить товар из Poizon',

@@ -1,5 +1,5 @@
 const bcrypt = require('bcrypt');
-const db = require('../database/sqlite');
+const { query } = require('../database/postgres');
 
 // ===== РЕГИСТРАЦИЯ =====
 exports.showRegister = (req, res) => {
@@ -16,8 +16,13 @@ exports.register = async (req, res) => {
     try {
         const hashedPassword = await bcrypt.hash(password, 10);
         
-        const existing = db.prepare('SELECT * FROM users WHERE username = ? OR email = ?').get(username, email);
-        if (existing) {
+        // Проверяем, есть ли уже пользователь
+        const existingResult = await query(
+            'SELECT * FROM users WHERE username = $1 OR email = $2',
+            [username, email]
+        );
+        
+        if (existingResult.rows.length > 0) {
             return res.render('register', { 
                 title: 'Регистрация', 
                 error: 'Пользователь уже существует', 
@@ -25,8 +30,11 @@ exports.register = async (req, res) => {
             });
         }
         
-        db.prepare('INSERT INTO users (username, email, password, fullname, phone) VALUES (?, ?, ?, ?, ?)')
-            .run(username, email, hashedPassword, fullname, phone);
+        // Добавляем пользователя
+        await query(
+            'INSERT INTO users (username, email, password, fullname, phone) VALUES ($1, $2, $3, $4, $5)',
+            [username, email, hashedPassword, fullname, phone]
+        );
         
         res.redirect('/login');
     } catch (error) {
@@ -52,7 +60,12 @@ exports.login = async (req, res) => {
     const { username, password } = req.body;
     
     try {
-        const user = db.prepare('SELECT * FROM users WHERE username = ? OR email = ?').get(username, username);
+        const userResult = await query(
+            'SELECT * FROM users WHERE username = $1 OR email = $1',
+            [username]
+        );
+        
+        const user = userResult.rows[0];
         
         if (!user) {
             return res.render('login', { 
@@ -95,48 +108,57 @@ exports.logout = (req, res) => {
     res.redirect('/');
 };
 
-// ===== ЛИЧНЫЙ КАБИНЕТ (С ДАННЫМИ) =====
-exports.cabinet = (req, res) => {
+// ===== ЛИЧНЫЙ КАБИНЕТ =====
+exports.cabinet = async (req, res) => {
     if (!req.session.user) {
         return res.redirect('/login');
     }
     
     try {
         // Данные пользователя
-        const user = db.prepare('SELECT * FROM users WHERE id = ?').get(req.session.user.id);
+        const userResult = await query('SELECT * FROM users WHERE id = $1', [req.session.user.id]);
+        const user = userResult.rows[0];
         
         // Адреса
         let addresses = [];
         try {
-            addresses = db.prepare('SELECT * FROM addresses WHERE user_id = ? ORDER BY is_default DESC').all(req.session.user.id);
+            const addressesResult = await query(
+                'SELECT * FROM addresses WHERE user_id = $1 ORDER BY is_default DESC',
+                [req.session.user.id]
+            );
+            addresses = addressesResult.rows;
         } catch (e) {
             console.log('Таблица addresses еще не создана');
         }
         
         // Избранное
-        // Избранное с названием и ценой
-let favorites = [];
-try {
-    favorites = db.prepare(`
-        SELECT f.*, p.name, p.price, p.brand 
-        FROM favorites f
-        JOIN products p ON f.product_id = p.id
-        WHERE f.user_id = ?
-        ORDER BY f.created_at DESC
-    `).all(req.session.user.id);
-} catch (e) {
-    console.log('Таблица favorites еще не создана');
-}
+        let favorites = [];
+        try {
+            const favoritesResult = await query(
+                `SELECT f.*, p.name, p.price, p.brand 
+                FROM favorites f
+                JOIN products p ON f.product_id = p.id
+                WHERE f.user_id = $1
+                ORDER BY f.created_at DESC`,
+                [req.session.user.id]
+            );
+            favorites = favoritesResult.rows;
+        } catch (e) {
+            console.log('Таблица favorites еще не создана');
+        }
         
         // Охота
         let hunts = [];
         try {
-            hunts = db.prepare("SELECT * FROM hunts WHERE user_id = ? AND status = 'active' ORDER BY created_at DESC").all(req.session.user.id);
+            const huntsResult = await query(
+                "SELECT * FROM hunts WHERE user_id = $1 AND status = 'active' ORDER BY created_at DESC",
+                [req.session.user.id]
+            );
+            hunts = huntsResult.rows;
         } catch (e) {
             console.log('Таблица hunts еще не создана');
         }
         
-        // Отправляем всё в шаблон
         res.render('cabinet', {
             title: 'Личный кабинет',
             user: user,

@@ -1,7 +1,7 @@
 const express = require('express');
 const session = require('express-session');
 const path = require('path');
-const db = require('./database/sqlite');
+const { initDB, query } = require('./database/postgres');
 
 const app = express();
 const PORT = 3000;
@@ -49,4 +49,13 @@ app.get('/', (req, res) => {
 
 app.listen(PORT, () => {
     console.log(`🚀 Сервер запущен на http://localhost:${PORT}`);
+});
+
+// Подключаемся к PostgreSQL перед запуском сервера
+initDB().then(() => {
+    app.listen(PORT, '0.0.0.0', () => {
+        console.log(`🚀 Сервер запущен на порту ${PORT}`);
+    });
+}).catch(err => {
+    console.error('❌ Не удалось запустить сервер:', err);
 });
