@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Новая охота | PLAZA</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/css/main.css">    
+    <style>
+        .form-container {
+            max-width: 600px;
+            margin: 40px auto;
+        }
+        
+        .form-card {
+            background: #fff;
+            border: 1px solid #eaeaea;
+            border-radius: 16px;
+            padding: 30px;
+        }
+        
+        .form-card h1 {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 30px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            color: #666;
+            margin-bottom: 8px;
+        }
+        
+        .form-group input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #eaeaea;
+            border-radius: 8px;
+            font-size: 14px;
+            font-family: 'Inter', sans-serif;
+        }
+        
+        .form-group input:focus {
+            outline: none;
+            border-color: #000;
+        }
+        
+        .hint {
+            font-size: 12px;
+            color: #999;
+            margin-top: 5px;
+        }
+        
+        .btn {
+            background: #000;
+            color: #fff;
+            border: none;
+            padding: 14px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            text-transform: uppercase;
+            cursor: pointer;
+            width: 100%;
+        }
+        
+        .btn:hover {
+            background: #222;
+        }
+        
+        .back-link {
+            display: inline-block;
+            margin-bottom: 20px;
+            color: #666;
+            text-decoration: none;
+            font-size: 13px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Хедер -->
+        <div class="header">
+            <a href="/" class="logo">PLAZA</a>
+            <div class="nav-links">
+                <a href="/">Главная</a>
+                <a href="/catalog">Кроссовки</a>
+                <a href="#">Охота</a>
+                <a href="#">Бренды</a>
+            </div>
+            <div class="header-actions">
+                <a href="/cabinet">Профиль</a>
+                <a href="/logout">Выйти</a>
+            </div>
+        </div>
+        
+        <div class="form-container">
+            <a href="/hunts" class="back-link">← Назад к охоте</a>
+            
+            <div class="form-card">
+                <h1>🎯 Новая цель для охоты</h1>
+                
+                <form method="POST" action="/hunts">
+                    <div class="form-group">
+                        <label>Название товара</label>
+                        <input type="text" name="product_name" required placeholder="Например: Nike Air Force 1 Tiffany">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Ссылка на товар</label>
+                        <input type="url" name="product_url" required placeholder="https://...">
+                        <div class="hint">Ссылка на Poizon, eBay, StockX или любой другой магазин</div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Целевая цена (₽)</label>
+                        <input type="number" name="target_price" placeholder="Например: 15000">
+                        <div class="hint">Мы уведомим, когда цена упадет ниже этой суммы</div>
+                    </div>
+                    
+                    <button type="submit" class="btn">Начать охоту</button>
+                </form>
+            </div>
+        </div>
+        
+        <!-- Подвал -->
+        <div class="footer">
+            <div class="footer-grid">
+                <div class="footer-col">
+                    <h4>PLAZA</h4>
+                    <ul>
+                        <li><a href="#">О нас</a></li>
+                        <li><a href="#">Контакты</a></li>
+                        <li><a href="#">Доставка</a></li>
+                    </ul>
+                </div>
+                <div class="footer-col">
+                    <h4>ПОКУПАТЕЛЯМ</h4>
+                    <ul>
+                        <li><a href="#">Как заказать</a></li>
+                        <li><a href="#">Размерная сетка</a></li>
+                        <li><a href="#">Возврат</a></li>
+                    </ul>
+                </div>
+                <div class="footer-col">
+                    <h4>БРЕНДЫ</h4>
+                    <ul>
+                        <li><a href="#">Nike</a></li>
+                        <li><a href="#">Adidas</a></li>
+                        <li><a href="#">Li-Ning</a></li>
+                    </ul>
+                </div>
+                <div class="footer-col">
+                    <h4>СВЯЗАТЬСЯ</h4>
+                    <ul>
+                        <li><a href="#">Telegram</a></li>
+                        <li><a href="#">VK</a></li>
+                        <li><a href="#">hello@plaza.ru</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                © 2024 PLAZA. Кроссовки со всего мира.
+            </div>
+        </div>
+    </div>
+    <script src="/js/navigation.js" defer></script>
+</body>
+</html>

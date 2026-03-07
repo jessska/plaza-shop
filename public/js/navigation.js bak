@@ -1,0 +1,81 @@
+/*
+// Жесткая навигация свайпами - только горизонтальные движения
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('✅ Swipe navigation loaded');
+    
+    let touchStart = { x: 0, y: 0 };
+    let touchEnd = { x: 0, y: 0 };
+    let touchMoved = false;
+    
+    document.addEventListener('touchstart', e => {
+        touchStart.x = e.changedTouches[0].screenX;
+        touchStart.y = e.changedTouches[0].screenY;
+        touchMoved = false;
+    }, { passive: true });
+    
+    document.addEventListener('touchmove', e => {
+        touchMoved = true;
+    }, { passive: true });
+    
+    document.addEventListener('touchend', e => {
+        if (!touchMoved) return; // Игнорируем тапы
+        
+        touchEnd.x = e.changedTouches[0].screenX;
+        touchEnd.y = e.changedTouches[0].screenY;
+        
+        const deltaX = touchEnd.x - touchStart.x;
+        const deltaY = touchEnd.y - touchStart.y;
+        
+        const absDeltaX = Math.abs(deltaX);
+        const absDeltaY = Math.abs(deltaY);
+        
+        console.log(`X: ${deltaX}, Y: ${deltaY}`);
+        
+        // УСЛОВИЯ СВАЙПА (ОЧЕНЬ ЖЕСТКИЕ):
+        // 1. Горизонтальное движение > 150px
+        // 2. Горизонтальное движение в 5 раз больше вертикального
+        // 3. Вертикальное движение < 30px (почти идеально горизонтально)
+        
+        if (absDeltaX > 150 && absDeltaY < 30) {
+            console.log('✅ HORIZONTAL SWIPE DETECTED');
+            
+            if (deltaX > 0) {
+                console.log('👉 Назад');
+                window.history.back();
+            } else {
+                console.log('👈 Вперед');
+                window.history.forward();
+            }
+        } else {
+            console.log('❌ Игнорируем - это скролл или наклонный свайп');
+        }
+    }, { passive: true });
+    
+    // Для тачпада - только если движение строго горизонтальное
+    let wheelAccumulator = 0;
+    let wheelTimer = null;
+    
+    document.addEventListener('wheel', e => {
+        // Проверяем, что это почти чистый горизонтальный скролл
+        if (Math.abs(e.deltaY) > Math.abs(e.deltaX) * 0.2) {
+            // Если есть хоть немного вертикали - игнорируем
+            return;
+        }
+        
+        wheelAccumulator += e.deltaX;
+        
+        clearTimeout(wheelTimer);
+        wheelTimer = setTimeout(() => {
+            if (Math.abs(wheelAccumulator) > 300) {
+                console.log('✅ WHEEL HORIZONTAL:', wheelAccumulator);
+                if (wheelAccumulator > 0) {
+                    window.history.forward();
+                } else {
+                    window.history.back();
+                }
+            }
+            wheelAccumulator = 0;
+        }, 150);
+    }, { passive: true });
+});
+*/

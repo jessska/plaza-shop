@@ -1,0 +1,665 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= product.name %> | PLAZA</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/css/main.css">
+    <style>
+        /* ===== СТРАНИЦА ТОВАРА ===== */
+        .product-page {
+            margin: 40px 0;
+        }
+
+        .back-link {
+            display: inline-block;
+            margin-bottom: 30px;
+            color: #666;
+            text-decoration: none;
+            font-size: 14px;
+            transition: color 0.2s;
+        }
+        .back-link:hover { color: #000; }
+
+        /* Основной блок с товаром */
+        .product-main {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 50px;
+            margin-bottom: 60px;
+        }
+
+        /* ===== ГАЛЕРЕЯ ===== */
+        .product-gallery {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        .main-image {
+            width: 100%;
+            aspect-ratio: 1 / 1;
+            background: #f8f8f8;
+            border-radius: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 120px;
+            overflow: hidden;
+        }
+        .main-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .thumbnail-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+        }
+        .thumbnail {
+            aspect-ratio: 1 / 1;
+            background: #f8f8f8;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 30px;
+            cursor: pointer;
+            border: 2px solid transparent;
+            transition: border-color 0.2s;
+            overflow: hidden;
+        }
+        .thumbnail:hover { border-color: #000; }
+        .thumbnail.active { border-color: #000; }
+        .thumbnail img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        /* ===== ИНФОРМАЦИЯ ===== */
+        .product-info {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        .product-brand {
+            font-size: 14px;
+            font-weight: 600;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .product-name {
+            font-size: 32px;
+            font-weight: 700;
+            line-height: 1.2;
+            margin-bottom: 10px;
+        }
+        .product-rating {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .stars {
+            color: #ffc107;
+            font-size: 16px;
+        }
+        .reviews-count {
+            color: #666;
+            font-size: 13px;
+        }
+        .hunt-badge-large {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        .hunt-badge-large.easy { background: rgba(0, 184, 148, 0.1); color: #00b894; }
+        .hunt-badge-large.medium { background: rgba(253, 203, 110, 0.1); color: #fdcb6e; }
+        .hunt-badge-large.hard { background: rgba(214, 48, 49, 0.1); color: #d63031; }
+
+        /* Цена */
+        .product-price-block {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin: 20px 0;
+            padding: 20px 0;
+            border-top: 1px solid #eaeaea;
+            border-bottom: 1px solid #eaeaea;
+        }
+        .current-price {
+            font-size: 36px;
+            font-weight: 700;
+        }
+        .old-price {
+            font-size: 20px;
+            color: #999;
+            text-decoration: line-through;
+        }
+        .discount-badge {
+            background: #d63031;
+            color: #fff;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        /* Размеры */
+        .product-sizes { margin: 20px 0; }
+        .sizes-title {
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .size-chart {
+            color: #666;
+            font-size: 12px;
+            text-decoration: underline;
+            cursor: pointer;
+        }
+        .size-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 10px;
+        }
+        .size-btn {
+            padding: 12px;
+            border: 1px solid #eaeaea;
+            border-radius: 8px;
+            background: #fff;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .size-btn:hover { border-color: #000; }
+        .size-btn.selected { background: #000; color: #fff; border-color: #000; }
+
+        /* Кнопки действий */
+        .product-actions {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr;
+            gap: 15px;
+            margin: 30px 0;
+        }
+        .btn-primary, .btn-secondary, .btn-outline {
+            padding: 16px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            text-align: center;
+            transition: all 0.2s;
+            border: none;
+        }
+        .btn-primary {
+            background: #000;
+            color: #fff;
+        }
+        .btn-primary:hover { background: #222; }
+        .btn-secondary {
+            background: #00b894;
+            color: #fff;
+        }
+        .btn-secondary:hover { background: #00997a; }
+        .btn-outline {
+            background: #fff;
+            border: 1px solid #000;
+            color: #000;
+        }
+        .btn-outline:hover { background: #f5f5f5; }
+
+        /* Мета-информация (доставка, оригинал) */
+        .product-meta {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin: 30px 0;
+            padding: 20px 0;
+            border-top: 1px solid #eaeaea;
+        }
+        .meta-item { text-align: center; }
+        .meta-icon { font-size: 24px; margin-bottom: 5px; }
+        .meta-label { font-size: 12px; color: #666; }
+
+        /* Описание и характеристики */
+        .product-description { margin: 30px 0; }
+        .description-title {
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 15px;
+        }
+        .description-text { color: #666; line-height: 1.6; }
+        .features-list {
+            list-style: none;
+            margin-top: 15px;
+        }
+        .features-list li {
+            padding: 10px 0;
+            border-bottom: 1px solid #f0f0f0;
+            display: flex;
+            gap: 10px;
+        }
+        .features-list li:before {
+            content: "✓";
+            color: #00b894;
+            font-weight: 700;
+        }
+
+        /* Блок с оригинальной ссылкой */
+        .source-block {
+            margin-top: 20px;
+            padding: 15px;
+            background: #f8f8f8;
+            border-radius: 8px;
+        }
+        .source-label { font-size: 12px; color: #666; margin-bottom: 5px; }
+        .source-link {
+            color: #000;
+            word-break: break-all;
+            font-size: 13px;
+        }
+
+        /* Похожие товары */
+        .similar-products {
+            margin-top: 60px;
+            padding-top: 40px;
+            border-top: 1px solid #eaeaea;
+        }
+        .similar-title {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 30px;
+        }
+        .similar-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+        }
+        .similar-card {
+            border: 1px solid #eaeaea;
+            border-radius: 16px;
+            padding: 15px;
+            text-decoration: none;
+            color: inherit;
+            transition: all 0.2s;
+        }
+        .similar-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+        }
+        .similar-image {
+            width: 100%;
+            aspect-ratio: 1;
+            background: #f5f5f5;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 40px;
+            margin-bottom: 10px;
+        }
+        .similar-brand {
+            font-size: 11px;
+            color: #666;
+        }
+        .similar-name {
+            font-weight: 600;
+            margin: 5px 0;
+        }
+        .similar-price {
+            font-weight: 700;
+        }
+
+        @media (max-width: 1024px) {
+            .similar-grid { grid-template-columns: repeat(3, 1fr); }
+        }
+        @media (max-width: 768px) {
+            .product-main { grid-template-columns: 1fr; }
+            .product-actions { grid-template-columns: 1fr; }
+            .size-grid { grid-template-columns: repeat(4, 1fr); }
+            .similar-grid { grid-template-columns: repeat(2, 1fr); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Шапка -->
+        <div class="header">
+            <a href="/" class="logo">PLAZA</a>
+            <div class="nav-links">
+                <a href="/">Главная</a>
+                <a href="/catalog">Кроссовки</a>
+                <a href="/hunts">Охота</a>
+                <a href="#">Бренды</a>
+            </div>
+            <div class="header-actions">
+    <% if (user) { %>
+        <a href="/cabinet">Профиль</a>
+        <a href="/favorites">❤️ Избранное</a>
+        <a href="/cart">🛒 Корзина</a>
+        <a href="/logout">Выйти</a>
+    <% } else { %>
+        <a href="/login">Войти</a>
+        <a href="/register">Регистрация</a>
+    <% } %>
+</div>
+        </div>
+
+        <!-- Страница товара -->
+        <div class="product-page">
+            <!-- Ссылка "Назад" -->
+            <a href="javascript:history.back()" class="back-link">← Назад в каталог</a>
+
+            <!-- Основной блок -->
+            <div class="product-main">
+                <!-- Левая колонка: Галерея -->
+                <div class="product-gallery">
+                    <div class="main-image" id="mainImage">
+                        <% if (product.image && product.image.startsWith('http')) { %>
+                            <img src="<%= product.image %>" alt="<%= product.name %>">
+                        <% } else { %>
+                            👟
+                        <% } %>
+                    </div>
+                    <div class="thumbnail-grid" id="thumbnailGrid">
+                        <% 
+                            let images = [];
+                            try {
+                                if (product.images) images = JSON.parse(product.images);
+                            } catch(e) {}
+                            if (!images || images.length === 0) images = [product.image];
+                            images.slice(0,4).forEach(img => { 
+                        %>
+                            <div class="thumbnail" onclick="changeImage('<%= img %>')">
+                                <% if (img && img.startsWith('http')) { %>
+                                    <img src="<%= img %>">
+                                <% } else { %>
+                                    👟
+                                <% } %>
+                            </div>
+                        <% }) %>
+                    </div>
+                </div>
+
+                <!-- Правая колонка: Информация -->
+                <div class="product-info">
+                    <div>
+                        <div class="product-brand"><%= product.brand || 'Бренд' %></div>
+                        <h1 class="product-name"><%= product.name %></h1>
+                        <div class="product-rating">
+                            <span class="stars">★★★★★</span>
+                            <span class="reviews-count">12 отзывов</span>
+                            <span class="hunt-badge-large <%= (product.hunt_level || 'MEDIUM').toLowerCase() %>">
+                                <%= product.hunt_level || 'MEDIUM' %> HUNT
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- Цена -->
+                    <div class="product-price-block">
+                        <div>
+                            <span class="current-price"><%= product.price.toLocaleString() %> ₽</span>
+                            <% if (product.old_price) { %>
+                                <span class="old-price"><%= product.old_price.toLocaleString() %> ₽</span>
+                            <% } %>
+                        </div>
+                        <% if (product.old_price) { %>
+                            <span class="discount-badge">
+                                -<%= Math.round((1 - product.price / product.old_price) * 100) %>%
+                            </span>
+                        <% } %>
+                    </div>
+
+                    <!-- Размеры -->
+                    <div class="product-sizes">
+                        <div class="sizes-title">
+                            Выберите размер
+                            <span class="size-chart" onclick="alert('Таблица размеров появится скоро')">Таблица размеров</span>
+                        </div>
+                        <div class="size-grid" id="sizeGrid">
+                            <% 
+                                let sizes = [];
+                                try {
+                                    if (typeof product.sizes === 'string') {
+                                        sizes = JSON.parse(product.sizes);
+                                    } else if (Array.isArray(product.sizes)) {
+                                        sizes = product.sizes;
+                                    }
+                                } catch(e) {
+                                    sizes = ['40','41','42','43','44'];
+                                }
+                                if (!sizes || sizes.length === 0) sizes = ['40','41','42','43','44'];
+                                sizes.forEach(size => { 
+                            %>
+                                <button class="size-btn" onclick="selectSize(this)"><%= size %></button>
+                            <% }) %>
+                        </div>
+                    </div>
+
+                    <!-- Кнопки действий -->
+                    <div class="product-actions">
+                        <button class="btn-primary" onclick="addToCart(<%= product.id %>, getSelectedSize())">Добавить в корзину</button>
+                        <button class="btn-secondary" onclick="addToHunt(<%= product.id %>)">🎯 В охоту</button>
+                        <button class="btn-outline" onclick="addToFavorites(<%= product.id %>)">❤️</button>
+                    </div>
+
+                    <!-- Мета-информация -->
+                    <div class="product-meta">
+                        <div class="meta-item">
+                            <div class="meta-icon">🚚</div>
+                            <div class="meta-label">Доставка 7-14 дней</div>
+                        </div>
+                        <div class="meta-item">
+                            <div class="meta-icon">✓</div>
+                            <div class="meta-label">Оригинал 100%</div>
+                        </div>
+                        <div class="meta-item">
+                            <div class="meta-icon">🔄</div>
+                            <div class="meta-label">Возврат 14 дней</div>
+                        </div>
+                    </div>
+
+                    <!-- Описание -->
+                    <div class="product-description">
+                        <h3 class="description-title">Описание</h3>
+                        <p class="description-text"><%= product.description || 'Описание отсутствует' %></p>
+                    </div>
+
+                    <!-- Характеристики -->
+                    <div class="product-description">
+                        <h3 class="description-title">Характеристики</h3>
+                        <ul class="features-list">
+                            <li>Бренд: <%= product.brand || 'Не указан' %></li>
+                            <li>Категория: <%= product.category || 'Кроссовки' %></li>
+                            <li>Страна: Китай</li>
+                            <li>Сезон: Всесезонный</li>
+                        </ul>
+                    </div>
+
+                    <!-- Ссылка на источник -->
+                    <% if (product.source_url) { %>
+                        <div class="source-block">
+                            <div class="source-label">Оригинал на Poizon:</div>
+                            <a href="<%= product.source_url %>" target="_blank" class="source-link">
+                                <%= product.source_url %>
+                            </a>
+                        </div>
+                    <% } %>
+                </div>
+            </div>
+
+            <!-- Похожие товары -->
+            <div class="similar-products">
+                <h2 class="similar-title">Похожие товары</h2>
+                <div class="similar-grid">
+                    <% if (similarProducts && similarProducts.length > 0) { %>
+                        <% similarProducts.slice(0,4).forEach(p => { %>
+                            <a href="/product/<%= p.id %>" class="similar-card">
+                                <div class="similar-image">
+                                    <% if (p.image && p.image.startsWith('http')) { %>
+                                        <img src="<%= p.image %>" style="width:100%; height:100%; object-fit:cover;">
+                                    <% } else { %>
+                                        👟
+                                    <% } %>
+                                </div>
+                                <div class="similar-brand"><%= p.brand %></div>
+                                <div class="similar-name"><%= p.name.substring(0,25) %>...</div>
+                                <div class="similar-price"><%= p.price.toLocaleString() %> ₽</div>
+                            </a>
+                        <% }) %>
+                    <% } else { %>
+                        <!-- Заглушки, если нет похожих -->
+                        <a href="/product/1" class="similar-card">
+                            <div class="similar-image">👟</div>
+                            <div class="similar-brand">Nike</div>
+                            <div class="similar-name">Air Force 1 Low</div>
+                            <div class="similar-price">12 990 ₽</div>
+                        </a>
+                        <a href="/product/2" class="similar-card">
+                            <div class="similar-image">👟</div>
+                            <div class="similar-brand">Jordan</div>
+                            <div class="similar-name">Air Jordan 1</div>
+                            <div class="similar-price">22 990 ₽</div>
+                        </a>
+                        <a href="/product/3" class="similar-card">
+                            <div class="similar-image">👟</div>
+                            <div class="similar-brand">Adidas</div>
+                            <div class="similar-name">Yeezy 350</div>
+                            <div class="similar-price">24 990 ₽</div>
+                        </a>
+                        <a href="/product/4" class="similar-card">
+                            <div class="similar-image">👟</div>
+                            <div class="similar-brand">Li-Ning</div>
+                            <div class="similar-name">Way of Wade 10</div>
+                            <div class="similar-price">18 990 ₽</div>
+                        </a>
+                    <% } %>
+                </div>
+            </div>
+        </div>
+
+        <!-- Подвал -->
+        <div class="footer">
+            <div class="footer-grid">
+                <div class="footer-col">
+                    <h4>PLAZA</h4>
+                    <ul>
+                        <li><a href="#">О нас</a></li>
+                        <li><a href="#">Контакты</a></li>
+                        <li><a href="#">Доставка</a></li>
+                        <li><a href="#">Оплата</a></li>
+                    </ul>
+                </div>
+                <div class="footer-col">
+                    <h4>ПОКУПАТЕЛЯМ</h4>
+                    <ul>
+                        <li><a href="#">Как заказать</a></li>
+                        <li><a href="#">Размерная сетка</a></li>
+                        <li><a href="#">Возврат</a></li>
+                        <li><a href="#">FAQ</a></li>
+                    </ul>
+                </div>
+                <div class="footer-col">
+                    <h4>БРЕНДЫ</h4>
+                    <ul>
+                        <li><a href="#">Nike</a></li>
+                        <li><a href="#">Adidas</a></li>
+                        <li><a href="#">Li-Ning</a></li>
+                        <li><a href="#">New Balance</a></li>
+                    </ul>
+                </div>
+                <div class="footer-col">
+                    <h4>СВЯЗАТЬСЯ</h4>
+                    <ul>
+                        <li><a href="#">Telegram</a></li>
+                        <li><a href="#">VK</a></li>
+                        <li><a href="#">hello@plaza.ru</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                © 2024 PLAZA. Кроссовки со всего мира.
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Выбор размера
+        function selectSize(btn) {
+            document.querySelectorAll('.size-btn').forEach(b => b.classList.remove('selected'));
+            btn.classList.add('selected');
+        }
+
+        // Получить выбранный размер
+        function getSelectedSize() {
+            const selected = document.querySelector('.size-btn.selected');
+            return selected ? selected.textContent : null;
+        }
+
+        // Смена главного изображения
+        function changeImage(src) {
+            const mainImage = document.getElementById('mainImage');
+            mainImage.innerHTML = `<img src="${src}" style="width:100%; height:100%; object-fit:cover;">`;
+            
+            document.querySelectorAll('.thumbnail').forEach(t => t.classList.remove('active'));
+            event.currentTarget.classList.add('active');
+        }
+
+        // Добавление в корзину
+        function addToCart(productId, size) {
+            if (!size) {
+                alert('Выберите размер');
+                return;
+            }
+            
+            fetch('/cart/add', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ productId, size })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    alert('Товар добавлен в корзину!');
+                } else {
+                    alert('Ошибка: ' + (data.error || 'Неизвестная ошибка'));
+                }
+            })
+            .catch(() => alert('Ошибка сети'));
+        }
+
+        // Добавление в охоту
+        function addToHunt(productId) {
+            fetch(`/hunts/add/${productId}`, { method: 'POST' })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) alert('Товар добавлен в охоту!');
+                    else alert('Ошибка');
+                })
+                .catch(() => alert('Ошибка сети'));
+        }
+
+        // Добавление в избранное
+        function addToFavorites(productId) {
+            fetch(`/favorites/add/${productId}`, { method: 'POST' })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) alert('Добавлено в избранное!');
+                    else alert('Ошибка');
+                })
+                .catch(() => alert('Ошибка сети'));
+        }
+    </script>
+</body>
+</html>

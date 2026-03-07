@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PLAZA — кроссовки со всего мира</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/main.css">
+    
+    <style>
+        .hero {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin: 40px 0 60px;
+        }
+        
+        .hero-main {
+            background: var(--bg-secondary);
+            padding: 40px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+        
+        .hero-main h1 {
+            font-size: 48px;
+            font-weight: 700;
+            margin-bottom: 20px;
+            line-height: 1.1;
+            letter-spacing: -1px;
+        }
+        
+        .hero-tag {
+            display: inline-block;
+            padding: 4px 12px;
+            background: var(--accent);
+            color: white;
+            font-size: 11px;
+            font-weight: 600;
+            margin-bottom: 20px;
+            letter-spacing: 1px;
+            width: fit-content;
+        }
+        
+        .categories {
+            display: flex;
+            gap: 30px;
+            padding: 20px 0;
+            margin-bottom: 40px;
+            border-bottom: 1px solid var(--border-color);
+            flex-wrap: wrap;
+        }
+        
+        .category-item {
+            text-decoration: none;
+            color: var(--text-primary);
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid transparent;
+        }
+        
+        .category-item.active {
+            border-bottom-color: var(--accent);
+        }
+        
+        .products-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+            margin: 40px 0;
+        }
+        
+        .product-card {
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 15px;
+            display: block;
+            text-decoration: none;
+            color: inherit;
+            transition: all 0.2s;
+        }
+        
+        .product-card:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow);
+            border-color: var(--accent);
+        }
+        
+        .product-image {
+            width: 100%;
+            aspect-ratio: 1;
+            background: var(--bg-secondary);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 40px;
+            margin-bottom: 10px;
+            overflow: hidden;
+        }
+        
+        .product-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .product-brand {
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            margin-bottom: 3px;
+        }
+        
+        .product-name {
+            font-size: 13px;
+            font-weight: 600;
+            margin: 5px 0;
+            color: var(--text-primary);
+            line-height: 1.3;
+            height: 34px;
+            overflow: hidden;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+        }
+        
+        .product-price {
+            font-size: 15px;
+            font-weight: 700;
+            color: var(--accent);
+            margin-top: 5px;
+        }
+        
+        .hunt-showcase {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin: 60px 0;
+            background: var(--bg-secondary);
+            padding: 40px;
+            border-radius: 16px;
+        }
+        
+        .hunt-info h2 {
+            font-size: 32px;
+            font-weight: 800;
+            margin-bottom: 20px;
+            line-height: 1.2;
+            letter-spacing: -1px;
+        }
+        
+        .hunt-levels {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-top: 30px;
+        }
+        
+        .hunt-level {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .hunt-marker {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 14px;
+        }
+        
+        .hunt-marker.easy { background: var(--hunt-easy); color: white; }
+        .hunt-marker.medium { background: var(--hunt-medium); color: white; }
+        .hunt-marker.hard { background: var(--hunt-hard); color: white; }
+        
+        .hunt-desc h4 {
+            font-size: 15px;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+        
+        .hunt-desc p {
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+        
+        .hunt-showcase-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+        }
+        
+        .hunt-card {
+            background: var(--bg-primary);
+            padding: 20px;
+            border-radius: 8px;
+            text-decoration: none;
+            color: inherit;
+            transition: all 0.3s;
+        }
+        
+        .hunt-card:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow);
+        }
+        
+        .hunt-card div:first-child {
+            font-size: 32px;
+            margin-bottom: 10px;
+        }
+        
+        .hunt-card div:nth-child(2) {
+            font-weight: 700;
+            font-size: 14px;
+        }
+        
+        .hunt-card div:last-child {
+            font-size: 11px;
+            color: var(--text-muted);
+        }
+
+        /* Компактные карточки для главной */
+.home-page .products-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+}
+
+.home-page .product-card {
+    padding: 8px;
+}
+
+.home-page .product-image {
+    font-size: 28px;
+}
+
+.home-page .product-name {
+    font-size: 10px;
+    height: 24px;
+}
+
+.home-page .product-price {
+    font-size: 11px;
+}
+        
+        @media (max-width: 1024px) {
+            .products-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .hero {
+                grid-template-columns: 1fr;
+            }
+            
+            .products-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .hunt-showcase {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .products-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Шапка -->
+        <div class="header">
+            <a href="/" class="logo">PLAZA</a>
+            <div class="nav-links">
+                <a href="/">Главная</a>
+                <a href="/catalog">Кроссовки</a>
+                <a href="/hunts">Охота</a>
+                <a href="#">Бренды</a>
+            </div>
+            <div class="header-actions">
+                <% if (user) { %>
+                    <a href="/cabinet">Профиль</a>
+                    <a href="/favorites">❤️ Избранное</a>
+                    <a href="/cart">🛒 Корзина</a>
+                    <a href="/logout">Выйти</a>
+                <% } else { %>
+                    <a href="/login">Войти</a>
+                    <a href="/register">Регистрация</a>
+                <% } %>
+            </div>
+        </div>
+
+        <!-- Герой -->
+        <div class="hero">
+            <div class="hero-main">
+                <span class="hero-tag">ЛИМИТИРОВАННЫЙ ДРОП</span>
+                <h1>NIKE AIR FORCE 1<br>"Tiffany & Co."</h1>
+                <p>Эксклюзивная коллаборация. Доставка из Китая за 7 дней.</p>
+            </div>
+            <div style="background: var(--bg-secondary); padding:40px; display:flex; align-items:center; justify-content:center; border-radius:16px;">
+                <span style="font-size:120px;">👟</span>
+            </div>
+        </div>
+
+        <!-- Категории -->
+        <div class="categories">
+            <a href="/catalog" class="category-item active">ВСЕ</a>
+            <a href="/catalog?brand=Nike" class="category-item">NIKE</a>
+            <a href="/catalog?brand=Jordan" class="category-item">JORDAN</a>
+            <a href="/catalog?brand=Adidas" class="category-item">ADIDAS</a>
+            <a href="/catalog?brand=New Balance" class="category-item">NEW BALANCE</a>
+        </div>
+
+        <!-- Популярные товары -->
+        <h2 style="margin:40px 0 20px;">Популярное</h2>
+        
+        <div class="products-grid">
+            <% if (products && products.length > 0) { %>
+                <% products.slice(0,4).forEach(product => { %>
+                    <a href="/product/<%= product.id %>" class="product-card">
+                        <div class="product-image">
+                            <% if (product.image && product.image.startsWith('http')) { %>
+                                <img src="<%= product.image %>" alt="<%= product.name %>">
+                            <% } else { %>
+                                👟
+                            <% } %>
+                        </div>
+                        <div class="product-brand"><%= product.brand || 'Бренд' %></div>
+                        <div class="product-name"><%= product.name.length > 35 ? product.name.substring(0,35) + '...' : product.name %></div>
+                        <div class="product-price"><%= product.price.toLocaleString() %> ₽</div>
+                    </a>
+                <% }) %>
+            <% } else { %>
+                <p>Товаров пока нет</p>
+            <% } %>
+        </div>
+
+        <!-- Секция Охота -->
+        <div class="hunt-showcase">
+            <div class="hunt-info">
+                <h2>ОХОТА ЗА<br>ЛИМИТКАМИ</h2>
+                <p style="color: var(--text-muted); margin-bottom: 30px;">Три уровня сложности. Доставим любые кроссовки из Китая и Европы.</p>
+                
+                <div class="hunt-levels">
+                    <div class="hunt-level">
+                        <div class="hunt-marker easy">E</div>
+                        <div class="hunt-desc">
+                            <h4>EASY HUNT</h4>
+                            <p>В наличии в Европе. Доставка 7-10 дней</p>
+                        </div>
+                    </div>
+                    <div class="hunt-level">
+                        <div class="hunt-marker medium">M</div>
+                        <div class="hunt-desc">
+                            <h4>MEDIUM HUNT</h4>
+                            <p>Китай (Poizon/Dewu). Проверка подлинности</p>
+                        </div>
+                    </div>
+                    <div class="hunt-level">
+                        <div class="hunt-marker hard">H</div>
+                        <div class="hunt-desc">
+                            <h4>HARD HUNT</h4>
+                            <p>Лимитированные дропы. Предзаказ</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="hunt-showcase-grid">
+                <a href="/product/1" class="hunt-card">
+                    <div>🔥</div>
+                    <div>Travis Scott</div>
+                    <div>Фрагменты · 3 размера</div>
+                </a>
+                <a href="/product/2" class="hunt-card">
+                    <div>👑</div>
+                    <div>Tiffany AF1</div>
+                    <div>Последняя пара</div>
+                </a>
+                <a href="/product/3" class="hunt-card">
+                    <div>🚂</div>
+                    <div>Li-Ning x Soulland</div>
+                    <div>Китай · 7 дней</div>
+                </a>
+                <a href="/product/4" class="hunt-card">
+                    <div>⭐</div>
+                    <div>Yeezy 700 V3</div>
+                    <div>Европа · 10 дней</div>
+                </a>
+            </div>
+        </div>
+
+        <!-- Подвал -->
+        <div class="footer">
+            <div class="footer-grid">
+                <div class="footer-col">
+                    <h4>PLAZA</h4>
+                    <ul>
+                        <li><a href="#">О нас</a></li>
+                        <li><a href="#">Контакты</a></li>
+                        <li><a href="#">Доставка</a></li>
+                        <li><a href="#">Оплата</a></li>
+                    </ul>
+                </div>
+                <div class="footer-col">
+                    <h4>ПОКУПАТЕЛЯМ</h4>
+                    <ul>
+                        <li><a href="#">Как заказать</a></li>
+                        <li><a href="#">Размерная сетка</a></li>
+                        <li><a href="#">Возврат</a></li>
+                        <li><a href="#">FAQ</a></li>
+                    </ul>
+                </div>
+                <div class="footer-col">
+                    <h4>БРЕНДЫ</h4>
+                    <ul>
+                        <li><a href="#">Nike</a></li>
+                        <li><a href="#">Adidas</a></li>
+                        <li><a href="#">Li-Ning</a></li>
+                        <li><a href="#">New Balance</a></li>
+                    </ul>
+                </div>
+                <div class="footer-col">
+                    <h4>СВЯЗАТЬСЯ</h4>
+                    <ul>
+                        <li><a href="#">Telegram</a></li>
+                        <li><a href="#">VK</a></li>
+                        <li><a href="#">hello@plaza.ru</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                © 2024 PLAZA. Кроссовки со всего мира.
+            </div>
+        </div>
+    </div>
+</body>
+</html>

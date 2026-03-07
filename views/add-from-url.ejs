@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Добавить из Poizon | PLAZA</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/main.css">
+    <style>
+        .form-container {
+            max-width: 600px;
+            margin: 40px auto;
+        }
+        .form-card {
+            background: #fff;
+            border: 1px solid #eaeaea;
+            border-radius: 16px;
+            padding: 30px;
+        }
+        .form-card h1 {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 20px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        .form-group label {
+            display: block;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            color: #666;
+            margin-bottom: 8px;
+        }
+        .form-group input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #eaeaea;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+        .form-group input:focus {
+            outline: none;
+            border-color: #000;
+        }
+        .btn {
+            background: #000;
+            color: #fff;
+            border: none;
+            padding: 14px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            text-transform: uppercase;
+            cursor: pointer;
+            width: 100%;
+        }
+        .btn:hover {
+            background: #222;
+        }
+        .error {
+            background: #fff0f0;
+            border: 1px solid #d63031;
+            color: #d63031;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        .back-link {
+            display: inline-block;
+            margin-bottom: 20px;
+            color: #666;
+            text-decoration: none;
+            font-size: 13px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <a href="/" class="logo">PLAZA</a>
+            <div class="nav-links">
+                <a href="/">Главная</a>
+                <a href="/catalog">Кроссовки</a>
+                <a href="/hunts">Охота</a>
+                <a href="#">Бренды</a>
+            </div>
+            <div class="header-actions">
+                <a href="/cabinet">Профиль</a>
+                <a href="/favorites">❤️ Избранное</a>
+                <a href="/logout">Выйти</a>
+            </div>
+        </div>
+
+        <a href="/catalog" class="back-link">← Назад в каталог</a>
+
+        <div class="form-container">
+            <div class="form-card">
+                <h1>🇨🇳 Добавить товар из Poizon</h1>
+                <p style="color:#666; margin-bottom:20px;">Вставьте ссылку на товар с Poizon (Dewu), и мы автоматически заполним все данные.</p>
+                
+                <% if (error) { %>
+                    <div class="error"><%= error %></div>
+                <% } %>
+                
+                <form method="POST" action="/add-from-url">
+                    <div class="form-group">
+                        <label>Ссылка на товар</label>
+                        <input type="url" name="url" required placeholder="https://www.poizon.com/product/...">
+                    </div>
+                    <button type="submit" class="btn">Загрузить товар</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Подвал -->
+        <div class="footer">
+            <div class="footer-grid">
+                <div class="footer-col">
+                    <h4>PLAZA</h4>
+                    <ul>
+                        <li><a href="#">О нас</a></li>
+                        <li><a href="#">Контакты</a></li>
+                        <li><a href="#">Доставка</a></li>
+                        <li><a href="#">Оплата</a></li>
+                    </ul>
+                </div>
+                <div class="footer-col">
+                    <h4>ПОКУПАТЕЛЯМ</h4>
+                    <ul>
+                        <li><a href="#">Как заказать</a></li>
+                        <li><a href="#">Размерная сетка</a></li>
+                        <li><a href="#">Возврат</a></li>
+                        <li><a href="#">FAQ</a></li>
+                    </ul>
+                </div>
+                <div class="footer-col">
+                    <h4>БРЕНДЫ</h4>
+                    <ul>
+                        <li><a href="#">Nike</a></li>
+                        <li><a href="#">Adidas</a></li>
+                        <li><a href="#">Li-Ning</a></li>
+                        <li><a href="#">New Balance</a></li>
+                    </ul>
+                </div>
+                <div class="footer-col">
+                    <h4>СВЯЗАТЬСЯ</h4>
+                    <ul>
+                        <li><a href="#">Telegram</a></li>
+                        <li><a href="#">VK</a></li>
+                        <li><a href="#">hello@plaza.ru</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                © 2024 PLAZA. Кроссовки со всего мира.
+            </div>
+        </div>
+    </div>
+</body>
+</html>

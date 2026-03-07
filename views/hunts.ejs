@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Моя охота | PLAZA</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/css/main.css">    
+    <style>
+        .hunts-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 40px 0 20px;
+        }
+        
+        .hunts-header h1 {
+            font-size: 24px;
+            font-weight: 700;
+        }
+        
+        .btn-add {
+            background: #000;
+            color: #fff;
+            text-decoration: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+        
+        .btn-add:hover {
+            background: #222;
+        }
+        
+        .hunts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+            gap: 20px;
+            margin: 30px 0;
+        }
+        
+        .hunt-card {
+            background: #fff;
+            border: 1px solid #eaeaea;
+            border-radius: 16px;
+            padding: 20px;
+            position: relative;
+            transition: all 0.3s;
+        }
+        
+        .hunt-card:hover {
+            box-shadow: 0 5px 20px rgba(0,0,0,0.05);
+        }
+        
+        .hunt-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+        
+        .hunt-title {
+            font-size: 16px;
+            font-weight: 700;
+        }
+        
+        .hunt-badge {
+            background: #000;
+            color: #fff;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 10px;
+            font-weight: 600;
+        }
+        
+        .hunt-site {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 15px;
+        }
+        
+        .site-tag {
+            background: #f0f0f0;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 600;
+            color: #666;
+        }
+        
+        .site-link {
+            color: #666;
+            text-decoration: none;
+            font-size: 11px;
+            max-width: 200px;
+            overflow: hidden;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+        }
+        
+        .site-link:hover {
+            color: #000;
+            text-decoration: underline;
+        }
+        
+        .prices {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 15px 0;
+            padding: 15px 0;
+            border-top: 1px solid #eaeaea;
+            border-bottom: 1px solid #eaeaea;
+        }
+        
+        .price-label {
+            font-size: 11px;
+            color: #666;
+            margin-bottom: 4px;
+        }
+        
+        .current-price {
+            font-weight: 700;
+            font-size: 18px;
+        }
+        
+        .target-price {
+            font-weight: 700;
+            font-size: 18px;
+            color: #00b894;
+        }
+        
+        .hunt-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 11px;
+            color: #999;
+        }
+        
+        .btn-delete {
+            background: none;
+            border: 1px solid #d63031;
+            color: #d63031;
+            padding: 6px 15px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        
+        .btn-delete:hover {
+            background: #d63031;
+            color: #fff;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            background: #f8f8f8;
+            border-radius: 16px;
+            margin: 40px 0;
+        }
+        
+        .empty-state p {
+            font-size: 16px;
+            color: #666;
+            margin-bottom: 20px;
+        }
+        
+        .back-link {
+            display: inline-block;
+            margin-bottom: 20px;
+            color: #666;
+            text-decoration: none;
+            font-size: 13px;
+        }
+        
+        .success-message {
+            background: #e8f5e9;
+            border: 1px solid #00b894;
+            color: #00b894;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        
+        .error-message {
+            background: #fff0f0;
+            border: 1px solid #d63031;
+            color: #d63031;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Хедер -->
+        <!-- Шапка сайта -->
+<div class="header">
+    <a href="/" class="logo">PLAZA</a>
+    <div class="nav-links">
+        <a href="/">Главная</a>
+        <a href="/catalog">Кроссовки</a>
+        <a href="/hunts">Охота</a>
+        <a href="#">Бренды</a>
+    </div>
+    <div class="header-actions">
+    <% if (user) { %>
+        <a href="/cabinet">Профиль</a>
+        <a href="/favorites">❤️ Избранное</a>
+        <a href="/cart">🛒 Корзина</a>
+        <a href="/logout">Выйти</a>
+    <% } else { %>
+        <a href="/login">Войти</a>
+        <a href="/register">Регистрация</a>
+    <% } %>
+</div>
+</div>
+        
+        <a href="/cabinet" class="back-link">← Назад в кабинет</a>
+        
+        <% if (success === 'added') { %>
+            <div class="success-message">Товар добавлен в охоту!</div>
+        <% } %>
+        
+        <% if (success === 'deleted') { %>
+            <div class="success-message">Охота удалена</div>
+        <% } %>
+        
+        <% if (error === '1') { %>
+            <div class="error-message">Произошла ошибка</div>
+        <% } %>
+        
+        <div class="hunts-header">
+            <h1>🎯 Моя охота</h1>
+            <a href="/hunts/new" class="btn-add">+ Новая охота</a>
+        </div>
+        
+        <% if (hunts && hunts.length > 0) { %>
+            <div class="hunts-grid">
+                <% hunts.forEach(hunt => { %>
+                    <div class="hunt-card">
+                        <div class="hunt-header">
+                            <span class="hunt-title"><%= hunt.product_name %></span>
+                            <span class="hunt-badge">HUNT</span>
+                        </div>
+                        
+                        <div class="hunt-site">
+                            <span class="site-tag">
+                                <% 
+                                    let siteName = 'Сайт';
+                                    try {
+                                        const url = new URL(hunt.product_url);
+                                        siteName = url.hostname.replace('www.', '');
+                                    } catch (e) {
+                                        siteName = 'Ссылка';
+                                    }
+                                %>
+                                <%= siteName %>
+                            </span>
+                            <a href="<%= hunt.product_url %>" target="_blank" class="site-link">
+                                <%= hunt.product_url %>
+                            </a>
+                        </div>
+                        
+                        <div class="prices">
+                            <div>
+                                <div class="price-label">Текущая цена</div>
+                                <div class="current-price">
+                                    <%= hunt.current_price ? hunt.current_price.toLocaleString() + ' ₽' : '—' %>
+                                </div>
+                            </div>
+                            <div>
+                                <div class="price-label">Цель</div>
+                                <div class="target-price">
+                                    <%= hunt.target_price ? hunt.target_price.toLocaleString() + ' ₽' : '—' %>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="hunt-footer">
+                            <span>Добавлено: <%= new Date(hunt.created_at).toLocaleDateString('ru-RU') %></span>
+                            <form method="POST" action="/hunts/<%= hunt.id %>/delete" style="display: inline;">
+                                <button type="submit" class="btn-delete" onclick="return confirm('Завершить охоту?')">Завершить</button>
+                            </form>
+                        </div>
+                    </div>
+                <% }) %>
+            </div>
+        <% } else { %>
+            <div class="empty-state">
+                <p>У вас пока нет активной охоты</p>
+                <a href="/hunts/new" class="btn-add">Добавить первую цель</a>
+            </div>
+        <% } %>
+        
+        <!-- Подвал -->
+        <div class="footer">
+            <div class="footer-grid">
+                <div class="footer-col">
+                    <h4>PLAZA</h4>
+                    <ul>
+                        <li><a href="#">О нас</a></li>
+                        <li><a href="#">Контакты</a></li>
+                        <li><a href="#">Доставка</a></li>
+                    </ul>
+                </div>
+                <div class="footer-col">
+                    <h4>ПОКУПАТЕЛЯМ</h4>
+                    <ul>
+                        <li><a href="#">Как заказать</a></li>
+                        <li><a href="#">Размерная сетка</a></li>
+                        <li><a href="#">Возврат</a></li>
+                    </ul>
+                </div>
+                <div class="footer-col">
+                    <h4>БРЕНДЫ</h4>
+                    <ul>
+                        <li><a href="#">Nike</a></li>
+                        <li><a href="#">Adidas</a></li>
+                        <li><a href="#">Li-Ning</a></li>
+                    </ul>
+                </div>
+                <div class="footer-col">
+                    <h4>СВЯЗАТЬСЯ</h4>
+                    <ul>
+                        <li><a href="#">Telegram</a></li>
+                        <li><a href="#">VK</a></li>
+                        <li><a href="#">hello@plaza.ru</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                © 2024 PLAZA. Кроссовки со всего мира.
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        const urlParams = new URLSearchParams(window.location.search);
+        window.success = urlParams.get('success');
+        window.error = urlParams.get('error');
+    </script>
+</body>
+</html>

@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= edit ? 'Редактировать' : 'Новый' %> адрес | PLAZA</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/global.css">
+    
+    <style>
+        .form-container {
+            max-width: 600px;
+            margin: 40px auto;
+        }
+        
+        .form-card {
+            background: #fff;
+            border: 1px solid #eaeaea;
+            border-radius: 16px;
+            padding: 30px;
+        }
+        
+        .form-card h1 {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 30px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            color: #666;
+            margin-bottom: 8px;
+        }
+        
+        .form-group input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #eaeaea;
+            border-radius: 8px;
+            font-size: 14px;
+            font-family: 'Inter', sans-serif;
+        }
+        
+        .form-group input:focus {
+            outline: none;
+            border-color: #000;
+        }
+        
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+        
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin: 20px 0;
+        }
+        
+        .checkbox-group input {
+            width: auto;
+        }
+        
+        .btn {
+            background: #000;
+            color: #fff;
+            border: none;
+            padding: 14px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            text-transform: uppercase;
+            cursor: pointer;
+            width: 100%;
+        }
+        
+        .btn:hover {
+            background: #222;
+        }
+        
+        .back-link {
+            display: inline-block;
+            margin-bottom: 20px;
+            color: #666;
+            text-decoration: none;
+            font-size: 13px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Хедер -->
+        <div class="header">
+            <a href="/" class="logo">PLAZA</a>
+            <div class="nav-links">
+                <a href="/">Главная</a>
+                <a href="/catalog">Кроссовки</a>
+                <a href="#">Охота</a>
+                <a href="#">Бренды</a>
+            </div>
+            <div class="header-actions">
+                <a href="/cabinet">Профиль</a>
+                <a href="/logout">Выйти</a>
+            </div>
+        </div>
+        
+        <div class="form-container">
+            <a href="/addresses" class="back-link">← Назад к адресам</a>
+            
+            <div class="form-card">
+                <h1><%= edit ? 'Редактировать адрес' : 'Новый адрес' %></h1>
+                
+                <form method="POST" action="<%= edit ? '/addresses/' + address.id : '/addresses' %>">
+                    <div class="form-group">
+                        <label>Название адреса</label>
+                        <input type="text" name="name" required placeholder="Например: Дом, Работа" value="<%= address ? address.name : '' %>">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>ФИО получателя</label>
+                        <input type="text" name="recipient" required placeholder="Иванов Иван Иванович" value="<%= address ? address.recipient : '' %>">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Телефон</label>
+                        <input type="tel" name="phone" required placeholder="+7 (999) 123-45-67" value="<%= address ? address.phone : '' %>">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Страна</label>
+                        <input type="text" name="country" required placeholder="Россия" value="<%= address ? address.country : '' %>">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Город</label>
+                        <input type="text" name="city" required placeholder="Москва" value="<%= address ? address.city : '' %>">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Адрес (улица, дом, квартира)</label>
+                        <input type="text" name="address" required placeholder="ул. Тверская, д. 1, кв. 1" value="<%= address ? address.address : '' %>">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Почтовый индекс</label>
+                        <input type="text" name="postal_code" placeholder="101000" value="<%= address ? address.postal_code : '' %>">
+                    </div>
+                    
+                    <div class="checkbox-group">
+                        <input type="checkbox" name="is_default" id="is_default" <%= (address && address.is_default) ? 'checked' : '' %>>
+                        <label for="is_default">Сделать основным адресом</label>
+                    </div>
+                    
+                    <button type="submit" class="btn">
+                        <%= edit ? 'Сохранить изменения' : 'Добавить адрес' %>
+                    </button>
+                </form>
+            </div>
+        </div>
+        
+        <!-- Подвал -->
+        <div class="footer">
+            <div class="footer-grid">
+                <div class="footer-col">
+                    <h4>PLAZA</h4>
+                    <ul>
+                        <li><a href="#">О нас</a></li>
+                        <li><a href="#">Контакты</a></li>
+                        <li><a href="#">Доставка</a></li>
+                    </ul>
+                </div>
+                <div class="footer-col">
+                    <h4>ПОКУПАТЕЛЯМ</h4>
+                    <ul>
+                        <li><a href="#">Как заказать</a></li>
+                        <li><a href="#">Размерная сетка</a></li>
+                        <li><a href="#">Возврат</a></li>
+                    </ul>
+                </div>
+                <div class="footer-col">
+                    <h4>БРЕНДЫ</h4>
+                    <ul>
+                        <li><a href="#">Nike</a></li>
+                        <li><a href="#">Adidas</a></li>
+                        <li><a href="#">Li-Ning</a></li>
+                    </ul>
+                </div>
+                <div class="footer-col">
+                    <h4>СВЯЗАТЬСЯ</h4>
+                    <ul>
+                        <li><a href="#">Telegram</a></li>
+                        <li><a href="#">VK</a></li>
+                        <li><a href="#">hello@plaza.ru</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                © 2024 PLAZA. Кроссовки со всего мира.
+            </div>
+        </div>
+    </div>
+    <script src="/js/navigation.js" defer></script>
+</body>
+</html>

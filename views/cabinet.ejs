@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Личный кабинет | PLAZA</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/main.css">
+    <style>
+        /* ===== КАБИНЕТ ===== */
+        .cabinet-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 30px;
+            margin: 40px 0;
+        }
+        
+        .cabinet-card {
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 25px;
+            transition: box-shadow 0.2s;
+        }
+        
+        .cabinet-card:hover {
+            box-shadow: var(--shadow);
+        }
+        
+        .cabinet-card h2 {
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .card-link {
+            font-size: 11px;
+            color: var(--text-muted);
+            text-decoration: none;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .card-link:hover {
+            color: var(--accent);
+        }
+        
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid var(--border-color);
+            font-size: 13px;
+        }
+        
+        .info-row:last-child {
+            border-bottom: none;
+        }
+        
+        .info-label {
+            color: var(--text-muted);
+        }
+        
+        .info-value {
+            color: var(--text-primary);
+            font-weight: 600;
+        }
+        
+        .welcome-block {
+            background: var(--bg-secondary);
+            border-radius: 16px;
+            padding: 30px;
+            margin: 30px 0;
+        }
+        
+        .welcome-block h1 {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+        
+        .welcome-block p {
+            color: var(--text-muted);
+        }
+        
+        /* ===== АДРЕСА ===== */
+        .address-card {
+            background: var(--bg-secondary);
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 10px;
+        }
+        
+        .address-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+        
+        .address-name {
+            font-weight: 700;
+            font-size: 14px;
+        }
+        
+        .address-badge {
+            background: var(--accent);
+            color: white;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 10px;
+            font-weight: 600;
+        }
+        
+        .address-line {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-bottom: 3px;
+        }
+        
+        .address-phone {
+            font-size: 12px;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            margin-top: 5px;
+        }
+        
+        /* ===== ИЗБРАННОЕ ===== */
+        .favorite-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid var(--border-color);
+            font-size: 12px;
+        }
+        
+        .favorite-name {
+            color: var(--text-primary);
+        }
+        
+        .favorite-price {
+            color: var(--accent);
+            font-weight: 600;
+        }
+        
+        /* ===== ОХОТА ===== */
+        .hunt-scroll {
+            max-height: 250px;
+            overflow-y: auto;
+            padding-right: 5px;
+        }
+        
+        .hunt-item {
+            background: var(--bg-secondary);
+            border-radius: 12px;
+            padding: 12px;
+            margin-bottom: 10px;
+        }
+        
+        .hunt-title {
+            font-weight: 700;
+            font-size: 13px;
+            margin-bottom: 5px;
+        }
+        
+        .hunt-meta {
+            display: flex;
+            justify-content: space-between;
+            font-size: 11px;
+            color: var(--text-muted);
+        }
+        
+        .hunt-price {
+            color: var(--accent);
+            font-weight: 600;
+        }
+        
+        .hunt-site {
+            font-size: 10px;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .site-tag {
+            background: var(--bg-primary);
+            padding: 2px 6px;
+            border-radius: 4px;
+        }
+        
+        /* ===== ПУСТЫЕ СОСТОЯНИЯ ===== */
+        .empty-state {
+            text-align: center;
+            padding: 30px;
+            color: var(--text-muted);
+            border: 2px dashed var(--border-color);
+            border-radius: 12px;
+        }
+        
+        .empty-state p {
+            font-size: 13px;
+            margin-bottom: 10px;
+        }
+        
+        .empty-state a {
+            color: var(--accent);
+            text-decoration: none;
+            font-size: 12px;
+        }
+        
+        .empty-state a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- ШАПКА (как в каталоге) -->
+        <div class="header">
+            <a href="/" class="logo">PLAZA</a>
+            <div class="nav-links">
+                <a href="/">Главная</a>
+                <a href="/catalog">Кроссовки</a>
+                <a href="/hunts">Охота</a>
+                <a href="#">Бренды</a>
+            </div>
+            <div class="header-actions">
+                <a href="/cabinet">Профиль</a>
+                <a href="/favorites">❤️ Избранное</a>
+                <a href="/cart">🛒 Корзина</a>
+                <a href="/logout">Выйти</a>
+            </div>
+        </div>
+
+        <!-- Приветствие -->
+        <div class="welcome-block">
+            <h1>Привет, <%= user.fullname || user.username %>! 👋</h1>
+            <p>Добро пожаловать в личный кабинет. Здесь твои заказы, размеры и охота за лимитками.</p>
+        </div>
+
+        <!-- Сетка карточек -->
+        <div class="cabinet-grid">
+            <!-- Мои данные -->
+            <div class="cabinet-card">
+                <h2>
+                    👤 Мои данные
+                    <a href="/settings" class="card-link">Настройки →</a>
+                </h2>
+                <div class="info-row">
+                    <span class="info-label">Имя</span>
+                    <span class="info-value"><%= user.fullname || 'Не указано' %></span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Телефон</span>
+                    <span class="info-value"><%= user.phone || 'Не указан' %></span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Email</span>
+                    <span class="info-value"><%= user.email %></span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Username</span>
+                    <span class="info-value"><%= user.username %></span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Дата регистрации</span>
+                    <span class="info-value"><%= new Date(user.created_at).toLocaleDateString('ru-RU') %></span>
+                </div>
+            </div>
+
+            <!-- Мои размеры -->
+            <div class="cabinet-card">
+                <h2>
+                    👟 Мои размеры
+                    <a href="/sizes" class="card-link">Редактировать →</a>
+                </h2>
+                <div class="info-row">
+                    <span class="info-label">EU размер</span>
+                    <span class="info-value"><%= user.eu_size || 'Не указан' %></span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">US размер</span>
+                    <span class="info-value"><%= user.us_size || 'Не указан' %></span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Длина стопы</span>
+                    <span class="info-value"><%= user.foot_length || 'Не указана' %> см</span>
+                </div>
+            </div>
+
+            <!-- Адреса доставки -->
+            <div class="cabinet-card">
+                <h2>
+                    📍 Адреса доставки
+                    <a href="/addresses" class="card-link">Управлять →</a>
+                </h2>
+                <% if (addresses && addresses.length > 0) { %>
+                    <% addresses.slice(0, 2).forEach(addr => { %>
+                        <div class="address-card">
+                            <div class="address-header">
+                                <span class="address-name"><%= addr.name %></span>
+                                <% if (addr.is_default) { %>
+                                    <span class="address-badge">ОСНОВНОЙ</span>
+                                <% } %>
+                            </div>
+                            <div class="address-line"><%= addr.recipient %></div>
+                            <div class="address-line"><%= addr.country %>, <%= addr.city %>, <%= addr.address %></div>
+                            <div class="address-phone">📞 <%= addr.phone %></div>
+                            <% if (addr.postal_code) { %>
+                                <div class="address-line">Индекс: <%= addr.postal_code %></div>
+                            <% } %>
+                        </div>
+                    <% }) %>
+                    <% if (addresses.length > 2) { %>
+                        <div style="text-align: center; margin-top: 10px; color: var(--text-muted); font-size: 11px;">
+                            + еще <%= addresses.length - 2 %> адреса
+                        </div>
+                    <% } %>
+                <% } else { %>
+                    <div class="empty-state">
+                        <p>🏠 Нет сохраненных адресов</p>
+                        <a href="/addresses/new">Добавить первый адрес</a>
+                    </div>
+                <% } %>
+            </div>
+
+            <!-- Избранное -->
+            <div class="cabinet-card">
+                <h2>
+                    ❤️ Избранное
+                    <a href="/favorites" class="card-link">Все →</a>
+                </h2>
+                <% if (favorites && favorites.length > 0) { %>
+                    <% favorites.slice(0, 5).forEach(item => { %>
+                        <div class="favorite-item">
+                            <span class="favorite-name"><%= item.name.substring(0, 25) %><%= item.name.length > 25 ? '...' : '' %></span>
+                            <span class="favorite-price"><%= item.price ? item.price.toLocaleString() + ' ₽' : '' %></span>
+                        </div>
+                    <% }) %>
+                    <% if (favorites.length > 5) { %>
+                        <div style="text-align: center; margin-top: 10px; color: var(--text-muted); font-size: 11px;">
+                            + еще <%= favorites.length - 5 %> товаров
+                        </div>
+                    <% } %>
+                <% } else { %>
+                    <div class="empty-state">
+                        <p>⭐ В избранном пока пусто</p>
+                        <a href="/catalog">Перейти в каталог</a>
+                    </div>
+                <% } %>
+            </div>
+
+            <!-- Моя охота -->
+            <div class="cabinet-card">
+                <h2>
+                    🎯 Моя охота
+                    <a href="/hunts" class="card-link">Все цели →</a>
+                </h2>
+                <% if (hunts && hunts.length > 0) { %>
+                    <div class="hunt-scroll">
+                        <% hunts.slice(0, 5).forEach(hunt => { %>
+                            <div class="hunt-item">
+                                <div class="hunt-title"><%= hunt.product_name.substring(0, 30) %><%= hunt.product_name.length > 30 ? '...' : '' %></div>
+                                <div class="hunt-site">
+                                    <span class="site-tag">
+                                        <% 
+                                            let siteName = 'poizon.com';
+                                            try {
+                                                const url = new URL(hunt.product_url);
+                                                siteName = url.hostname.replace('www.', '');
+                                            } catch (e) {
+                                                siteName = 'poizon.com';
+                                            }
+                                        %>
+                                        <%= siteName %>
+                                    </span>
+                                    <span style="color: var(--text-muted);"><%= hunt.product_url.substring(0, 25) %>...</span>
+                                </div>
+                                <div class="hunt-meta">
+                                    <span>Цель: <span class="hunt-price"><%= hunt.target_price ? hunt.target_price.toLocaleString() + ' ₽' : '—' %></span></span>
+                                    <span><%= new Date(hunt.created_at).toLocaleDateString('ru-RU') %></span>
+                                </div>
+                            </div>
+                        <% }) %>
+                    </div>
+                    <% if (hunts.length > 5) { %>
+                        <div style="text-align: center; margin-top: 10px; color: var(--text-muted); font-size: 11px;">
+                            + еще <%= hunts.length - 5 %> целей
+                        </div>
+                    <% } %>
+                <% } else { %>
+                    <div class="empty-state">
+                        <p>🦅 Нет активной охоты</p>
+                        <a href="/hunts/new">Добавить цель</a>
+                    </div>
+                <% } %>
+            </div>
+
+            <!-- История заказов -->
+            <div class="cabinet-card">
+                <h2>
+                    📦 История заказов
+                    <span class="card-link" style="color: var(--text-muted);">Скоро</span>
+                </h2>
+                <div class="empty-state">
+                    <p>У тебя пока нет заказов</p>
+                    <a href="/catalog">Начать покупки</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Подвал -->
+        <div class="footer">
+            <div class="footer-grid">
+                <div class="footer-col">
+                    <h4>PLAZA</h4>
+                    <ul>
+                        <li><a href="#">О нас</a></li>
+                        <li><a href="#">Контакты</a></li>
+                        <li><a href="#">Доставка</a></li>
+                        <li><a href="#">Оплата</a></li>
+                    </ul>
+                </div>
+                <div class="footer-col">
+                    <h4>ПОКУПАТЕЛЯМ</h4>
+                    <ul>
+                        <li><a href="#">Как заказать</a></li>
+                        <li><a href="#">Размерная сетка</a></li>
+                        <li><a href="#">Возврат</a></li>
+                        <li><a href="#">FAQ</a></li>
+                    </ul>
+                </div>
+                <div class="footer-col">
+                    <h4>БРЕНДЫ</h4>
+                    <ul>
+                        <li><a href="#">Nike</a></li>
+                        <li><a href="#">Adidas</a></li>
+                        <li><a href="#">Li-Ning</a></li>
+                        <li><a href="#">New Balance</a></li>
+                    </ul>
+                </div>
+                <div class="footer-col">
+                    <h4>СВЯЗАТЬСЯ</h4>
+                    <ul>
+                        <li><a href="#">Telegram</a></li>
+                        <li><a href="#">VK</a></li>
+                        <li><a href="#">hello@plaza.ru</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                © 2024 PLAZA. Кроссовки со всего мира.
+            </div>
+        </div>
+    </div>
+</body>
+</html>

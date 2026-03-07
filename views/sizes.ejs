@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Мои размеры | PLAZA</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/css/main.css">    
+    <style>
+        .sizes-container {
+            max-width: 500px;
+            margin: 40px auto;
+        }
+        
+        .sizes-card {
+            background: #fff;
+            border: 1px solid #eaeaea;
+            border-radius: 16px;
+            padding: 30px;
+        }
+        
+        .sizes-card h1 {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 30px;
+        }
+        
+        .form-group {
+            margin-bottom: 25px;
+        }
+        
+        .form-group label {
+            display: block;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            color: #666;
+            margin-bottom: 8px;
+        }
+        
+        .form-group input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #eaeaea;
+            border-radius: 8px;
+            font-size: 14px;
+            font-family: 'Inter', sans-serif;
+        }
+        
+        .form-group input:focus {
+            outline: none;
+            border-color: #000;
+        }
+        
+        .size-hint {
+            font-size: 12px;
+            color: #999;
+            margin-top: 5px;
+        }
+        
+        .btn {
+            background: #000;
+            color: #fff;
+            border: none;
+            padding: 14px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            text-transform: uppercase;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 20px;
+        }
+        
+        .btn:hover {
+            background: #222;
+        }
+        
+        .back-link {
+            display: inline-block;
+            margin-bottom: 20px;
+            color: #666;
+            text-decoration: none;
+            font-size: 13px;
+        }
+        
+        .back-link:hover {
+            color: #000;
+        }
+        
+        .success-message {
+            background: #e8f5e9;
+            border: 1px solid #00b894;
+            color: #00b894;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        
+        .error-message {
+            background: #fff0f0;
+            border: 1px solid #d63031;
+            color: #d63031;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Хедер -->
+        <!-- Шапка сайта -->
+<div class="header">
+    <a href="/" class="logo">PLAZA</a>
+    <div class="nav-links">
+        <a href="/">Главная</a>
+        <a href="/catalog">Кроссовки</a>
+        <a href="/hunts">Охота</a>
+        <a href="#">Бренды</a>
+    </div>
+   <div class="header-actions">
+    <% if (user) { %>
+        <a href="/cabinet">Профиль</a>
+        <a href="/favorites">❤️ Избранное</a>
+        <a href="/cart">🛒 Корзина</a>
+        <a href="/logout">Выйти</a>
+    <% } else { %>
+        <a href="/login">Войти</a>
+        <a href="/register">Регистрация</a>
+    <% } %>
+</div>
+</div>
+        
+        <div class="sizes-container">
+            <a href="/cabinet" class="back-link">← Назад в кабинет</a>
+            
+            <% if (success === '1') { %>
+                <div class="success-message">Размеры сохранены!</div>
+            <% } %>
+            
+            <% if (error === '1') { %>
+                <div class="error-message">Ошибка при сохранении</div>
+            <% } %>
+            
+            <div class="sizes-card">
+                <h1>👟 Мои размеры</h1>
+                
+                <form method="POST" action="/sizes">
+                    <div class="form-group">
+                        <label>EU размер (европейский)</label>
+                        <input type="text" name="eu_size" placeholder="Например: 42" value="<%= sizes && sizes.eu_size ? sizes.eu_size : '' %>">
+                        <div class="size-hint">Самый распространенный размер в Европе</div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>US размер (американский)</label>
+                        <input type="text" name="us_size" placeholder="Например: 9" value="<%= sizes && sizes.us_size ? sizes.us_size : '' %>">
+                        <div class="size-hint">Для кроссовок из США</div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Длина стопы (см)</label>
+                        <input type="text" name="foot_length" placeholder="Например: 27.5" value="<%= sizes && sizes.foot_length ? sizes.foot_length : '' %>">
+                        <div class="size-hint">Измерьте от пятки до большого пальца</div>
+                    </div>
+                    
+                    <button type="submit" class="btn">Сохранить размеры</button>
+                </form>
+            </div>
+        </div>
+        
+        <!-- Подвал -->
+        <div class="footer">
+            <div class="footer-grid">
+                <div class="footer-col">
+                    <h4>PLAZA</h4>
+                    <ul>
+                        <li><a href="#">О нас</a></li>
+                        <li><a href="#">Контакты</a></li>
+                        <li><a href="#">Доставка</a></li>
+                    </ul>
+                </div>
+                <div class="footer-col">
+                    <h4>ПОКУПАТЕЛЯМ</h4>
+                    <ul>
+                        <li><a href="#">Как заказать</a></li>
+                        <li><a href="#">Размерная сетка</a></li>
+                        <li><a href="#">Возврат</a></li>
+                    </ul>
+                </div>
+                <div class="footer-col">
+                    <h4>БРЕНДЫ</h4>
+                    <ul>
+                        <li><a href="#">Nike</a></li>
+                        <li><a href="#">Adidas</a></li>
+                        <li><a href="#">Li-Ning</a></li>
+                    </ul>
+                </div>
+                <div class="footer-col">
+                    <h4>СВЯЗАТЬСЯ</h4>
+                    <ul>
+                        <li><a href="#">Telegram</a></li>
+                        <li><a href="#">VK</a></li>
+                        <li><a href="#">hello@plaza.ru</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                © 2024 PLAZA. Кроссовки со всего мира.
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        const urlParams = new URLSearchParams(window.location.search);
+        window.success = urlParams.get('success');
+        window.error = urlParams.get('error');
+    </script>
+    <script src="/js/navigation.js" defer></script>
+</body>
+</html>
