@@ -118,6 +118,19 @@ async function createTables() {
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             )
         `);
+            // Корзина
+await pool.query(`
+    CREATE TABLE IF NOT EXISTS carts (
+        id SERIAL PRIMARY KEY,
+        user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+        product_id INTEGER NOT NULL,
+        quantity INTEGER DEFAULT 1,
+        size VARCHAR(10),
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        UNIQUE(user_id, product_id, size)
+    )
+`);
+        
 
         console.log('✅ Все таблицы созданы');
 
