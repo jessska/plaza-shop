@@ -11,9 +11,9 @@ const requireAuth = (req, res, next) => {
 };
 
 // ===== ПОЛУЧИТЬ КОРЗИНУ =====
-router.get('/cart', requireAuth, (req, res) => {
+router.get('/cart', requireAuth, async (req, res) => {
     try {
-        const cartItems = db.prepare(`
+        const cartResult = await query(`
             SELECT 
                 c.*,
                 p.name,
@@ -23,9 +23,11 @@ router.get('/cart', requireAuth, (req, res) => {
                 p.hunt_level
             FROM carts c
             JOIN products p ON c.product_id = p.id
-            WHERE c.user_id = ?
+            WHERE c.user_id = $1
             ORDER BY c.created_at DESC
-        `).all(req.session.user.id);
+        `, [req.session.user.id]);
+        
+        const cartItems = cartResult.rows;
         
         // Считаем общую сумму
         const total = cartItems.reduce((sum, item) => {
@@ -47,7 +49,7 @@ router.get('/cart', requireAuth, (req, res) => {
 });
 
 // ===== ДОБАВИТЬ В КОРЗИНУ =====
-router.post('/cart/add', requireAuth, (req, res) => {
+router.post('/cart/add', requireAuth, async (req, res) => {
     const { productId, size } = req.body;
     
     if (!productId) {
@@ -56,37 +58,41 @@ router.post('/cart/add', requireAuth, (req, res) => {
     
     try {
         // Проверяем, есть ли уже такой товар в корзине
-        const existing = db.prepare(`
+        const existingResult = await query(`
             SELECT * FROM carts 
-            WHERE user_id = ? AND product_id = ? AND size = ?
-        `).get(req.session.user.id, productId, size || null);
+            WHERE user_id = $1 AND product_id = $2 AND size = $3
+        `, [req.session.user.id, productId, size || null]);
+        
+        const existing = existingResult.rows[0];
         
         if (existing) {
             // Если есть — увеличиваем количество
-            db.prepare(`
+            await query(`
                 UPDATE carts 
                 SET quantity = quantity + 1 
-                WHERE id = ?
-            `).run(existing.id);
+                WHERE id = $1
+            `, [existing.id]);
         } else {
             // Если нет — добавляем
-            db.prepare(`
+            await query(`
                 INSERT INTO carts (user_id, product_id, quantity, size)
-                VALUES (?, ?, 1, ?)
-            `).run(req.session.user.id, productId, size || null);
+                VALUES ($1, $2, 1, $3)
+            `, [req.session.user.id, productId, size || null]);
         }
         
         // Получаем общее количество товаров в корзине
-        const count = db.prepare(`
-            SELECT SUM(quantity) as total 
+        const countResult = await query(`
+            SELECT COALESCE(SUM(quantity), 0) as total 
             FROM carts 
-            WHERE user_id = ?
-        `).get(req.session.user.id);
+            WHERE user_id = $1
+        `, [req.session.user.id]);
+        
+        const total = parseInt(countResult.rows[0].total);
         
         res.json({ 
             success: true, 
             message: 'Товар добавлен в корзину',
-            cartCount: count.total || 0
+            cartCount: total
         });
         
     } catch (error) {
@@ -96,7 +102,7 @@ router.post('/cart/add', requireAuth, (req, res) => {
 });
 
 // ===== ОБНОВИТЬ КОЛИЧЕСТВО =====
-router.post('/cart/update', requireAuth, (req, res) => {
+router.post('/cart/update', requireAuth, async (req, res) => {
     const { itemId, quantity } = req.body;
     
     if (!itemId || quantity < 1) {
@@ -104,11 +110,11 @@ router.post('/cart/update', requireAuth, (req, res) => {
     }
     
     try {
-        db.prepare(`
+        await query(`
             UPDATE carts 
-            SET quantity = ? 
-            WHERE id = ? AND user_id = ?
-        `).run(quantity, itemId, req.session.user.id);
+            SET quantity = $1 
+            WHERE id = $2 AND user_id = $3
+        `, [quantity, itemId, req.session.user.id]);
         
         res.json({ success: true });
         
@@ -119,12 +125,12 @@ router.post('/cart/update', requireAuth, (req, res) => {
 });
 
 // ===== УДАЛИТЬ ИЗ КОРЗИНЫ =====
-router.post('/cart/remove/:id', requireAuth, (req, res) => {
+router.post('/cart/remove/:id', requireAuth, async (req, res) => {
     try {
-        db.prepare(`
+        await query(`
             DELETE FROM carts 
-            WHERE id = ? AND user_id = ?
-        `).run(req.params.id, req.session.user.id);
+            WHERE id = $1 AND user_id = $2
+        `, [req.params.id, req.session.user.id]);
         
         res.json({ success: true });
         
@@ -135,9 +141,9 @@ router.post('/cart/remove/:id', requireAuth, (req, res) => {
 });
 
 // ===== ОЧИСТИТЬ КОРЗИНУ =====
-router.post('/cart/clear', requireAuth, (req, res) => {
+router.post('/cart/clear', requireAuth, async (req, res) => {
     try {
-        db.prepare('DELETE FROM carts WHERE user_id = ?').run(req.session.user.id);
+        await query('DELETE FROM carts WHERE user_id = $1', [req.session.user.id]);
         res.json({ success: true });
     } catch (error) {
         console.error('Ошибка очистки корзины:', error);
