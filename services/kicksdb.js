@@ -1,5 +1,5 @@
 const axios = require('axios');
-const db = require('../database/sqlite');
+const { query } = require('../database/postgres');
 
 class KicksDB {
     constructor(apiKey) {

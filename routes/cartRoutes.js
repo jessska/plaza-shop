@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const db = require('../database/sqlite');
+const { query } = require('../database/postgres');
 
 // Проверка авторизации
 const requireAuth = (req, res, next) => {
