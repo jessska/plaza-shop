@@ -366,12 +366,12 @@
                 <!-- Левая колонка: Галерея -->
                 <div class="product-gallery">
                     <div class="main-image" id="mainImage">
-                        <% if (product.image && product.image.startsWith('http')) { %>
-                            <img src="<%= product.image %>" alt="<%= product.name %>">
-                        <% } else { %>
-                            👟
-                        <% } %>
-                    </div>
+    <% if (product.image) { %>
+        <img src="<%= product.image %>" alt="<%= product.name %>" style="width:100%; height:100%; object-fit:cover;">
+    <% } else { %>
+        👟
+    <% } %>
+</div>
                     <div class="thumbnail-grid" id="thumbnailGrid">
                         <% 
                             let images = [];
@@ -381,13 +381,13 @@
                             if (!images || images.length === 0) images = [product.image];
                             images.slice(0,4).forEach(img => { 
                         %>
-                            <div class="thumbnail" onclick="changeImage('<%= img %>')">
-                                <% if (img && img.startsWith('http')) { %>
-                                    <img src="<%= img %>">
-                                <% } else { %>
-                                    👟
-                                <% } %>
-                            </div>
+                            <div class="main-image" id="mainImage">
+    <% if (product.image) { %>
+        <img src="<%= product.image %>" alt="<%= product.name %>" style="width:100%; height:100%; object-fit:cover;">
+    <% } else { %>
+        👟
+    <% } %>
+</div>
                         <% }) %>
                     </div>
                 </div>
@@ -506,13 +506,13 @@
                     <% if (similarProducts && similarProducts.length > 0) { %>
                         <% similarProducts.slice(0,4).forEach(p => { %>
                             <a href="/product/<%= p.id %>" class="similar-card">
-                                <div class="similar-image">
-                                    <% if (p.image && p.image.startsWith('http')) { %>
-                                        <img src="<%= p.image %>" style="width:100%; height:100%; object-fit:cover;">
-                                    <% } else { %>
-                                        👟
-                                    <% } %>
-                                </div>
+                                <div class="main-image" id="mainImage">
+    <% if (product.image) { %>
+        <img src="<%= product.image %>" alt="<%= product.name %>" style="width:100%; height:100%; object-fit:cover;">
+    <% } else { %>
+        👟
+    <% } %>
+</div>
                                 <div class="similar-brand"><%= p.brand %></div>
                                 <div class="similar-name"><%= p.name.substring(0,25) %>...</div>
                                 <div class="similar-price"><%= p.price.toLocaleString() %> ₽</div>
